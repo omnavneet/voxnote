@@ -1,80 +1,86 @@
-User
-userId (string)
-name (string)
-email (string)
+# VoxNote Schema
 
-Note
-Used for text, PDF, audio, interview output.
+## User
+Stored in Cognito only.
+Derived at runtime from JWT.
+
 Fields:
-noteId (string)
-userId (string)
-title (string)
-content (string)
-type (text | pdf | audio | interview | ai)
-createdAt (ISO string)
-updatedAt (ISO string)
-embeddingId (string | null)
-metadata (object)
+- userId (Cognito sub)
+- email
+- name
+
+---
+
+## Note
+Core memory unit.
+
+Fields:
+- userId (string)
+- noteId (string, UUID)
+- title (string)
+- content (string)          # full text
+- summary (string | null)   # AI summary
+- type (text | pdf | audio | interview | ai)
+- createdAt (ISO string)
+- updatedAt (ISO string)
+
+- fileUrl (string | null)   # S3 PDF/audio
+- embeddingId (string | null)
+- metadata (object)
 
 DynamoDB:
 Table: Notes
-Partition key: userId
-Sort key: noteId
+PK: userId
+SK: noteId
 
-Vector DB (Pinecone):
+Pinecone:
 Index: voxnote
 Namespace: userId
 Metadata: noteId, type
 
-Task
-Used only on Dashboard (today’s tasks).
+## Task
+Dashboard-only, short-lived.
+
 Fields:
-taskId (string)
-userId (string)
-text (string)
-completed (boolean)
-createdAt (ISO string)
+- userId
+- taskId
+- text
+- completed (boolean)
+- createdAt
 
 DynamoDB:
 Table: Tasks
-Partition key: userId
-Sort key: taskId
+PK: userId
+SK: taskId
 
-FocusSession
-Used for focus timer analytics.
+## TimetableSlot
+Weekly visual planner.
+
 Fields:
-sessionId (string)
-userId (string)
-duration (number, minutes)
-startedAt (ISO string)
+- userId
+- slotId (day-hour, e.g. Mon-14)
+- day (Mon..Sun)
+- hour (0–23)
+- label
+- category (study | class | work | break | personal)
+- createdAt
 
 DynamoDB:
-Table: FocusSessions
-Partition key: userId
-Sort key: sessionId
-
-TimetableSlot
-Weekly visual timetable (1-hour blocks).
-Fields:
-slotId (string)
-userId (string)
-day (Mon | Tue | Wed | Thu | Fri | Sat | Sun)
-hour (number, 0–23)
-label (string)
-category (study | class | work | break | personal)
-createdAt (ISO string)
-
-DynamoDB:
-
 Table: Timetable
-Partition key: userId
-Sort key: slotId
+PK: userId
+SK: slotId
 
-AudioSession
-Voice recordings before processing.
+## AudioSession
+Temporary before conversion to Note.
+
 Fields:
-audioId (string)
-userId (string)
-s3Url (string)
-transcript (string | null)
-createdAt (ISO string)
+- userId
+- audioId
+- s3Url
+- transcript (string | null)
+- createdAt
+
+DynamoDB:
+Table: AudioSessions
+PK: userId
+SK: audioId

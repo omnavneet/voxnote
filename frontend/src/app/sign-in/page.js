@@ -1,8 +1,6 @@
 "use client";
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { InitiateAuthCommand } from "@aws-sdk/client-cognito-identity-provider";
-import { cognitoClient, COGNITO } from "../cognito";
 import { useRouter } from 'next/navigation';
 
 export default function SignIn() {
@@ -15,19 +13,13 @@ export default function SignIn() {
     event.preventDefault();
 
     try {
-      const res = await cognitoClient.send(new InitiateAuthCommand({
-        AuthFlow: 'USER_PASSWORD_AUTH',
-        ClientId: COGNITO.clientId,
-        AuthParameters: {
-          USERNAME: email,
-          PASSWORD: password
-        }
-      }));
-      alert("Sign in successful!");
-      
-      const idToken = res.AuthenticationResult.IdToken;
-      localStorage.setItem('idToken', idToken);
-      router.push('/dashboard');
+      await fetch("http://localhost:5000/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",  
+        body: JSON.stringify({ email, password }),
+      });
+      router.push("/app");
     } catch (error) {
       alert("Error signing in: " + error.message);
     }

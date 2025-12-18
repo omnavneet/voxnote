@@ -1,8 +1,6 @@
 "use client";
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { cognitoClient, COGNITO } from '../cognito';
-import { SignUpCommand } from "@aws-sdk/client-cognito-identity-provider";
 import { useRouter } from 'next/navigation';
 
 export default function SignUp() {
@@ -16,16 +14,12 @@ export default function SignUp() {
     event.preventDefault();
 
     try {
-      await cognitoClient.send(new SignUpCommand({
-        ClientId: COGNITO.clientId,
-        Username: email,
-        Password: password,
-        UserAttributes: [ 
-          { Name: 'email', Value: email }
-        ]
-      }));
-      alert("Sign up successful! Please check your email to confirm your account.");
-      router.push(`/verify?email=${encodeURIComponent(email)}`);
+      await fetch("http://localhost:5000/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      router.push(`/verify?email=${encodeURIComponent(email)}`)
     } catch (error) {
       alert("Error signing up: " + error.message);
     }

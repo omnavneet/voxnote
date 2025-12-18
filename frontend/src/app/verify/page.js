@@ -1,8 +1,6 @@
 "use client";
 import { useState } from "react";
 import { useRouter, useSearchParams } from 'next/navigation';
-import { ConfirmSignUpCommand } from "@aws-sdk/client-cognito-identity-provider";
-import { cognitoClient, COGNITO } from "../cognito";
 
 export default function Verify() {
   const [code, setCode] = useState("");
@@ -15,16 +13,15 @@ export default function Verify() {
   async function handleVerify(e) {
     e.preventDefault();
     setLoading(true);
+
     try {
-      await cognitoClient.send(
-        new ConfirmSignUpCommand({
-          ClientId: COGNITO.clientId,
-          Username: email,
-          ConfirmationCode: code
-        })
-      );
-      setStatus("Verification successful! Redirecting to sign-in...");
-      router.push('/sign-in');
+      await fetch("http://localhost:5000/auth/verify-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, code }),
+      });
+      router.push("/sign-in");
+
     } catch (err) {
       alert(err.message);
     } finally {
@@ -54,7 +51,7 @@ export default function Verify() {
           >
             {loading ? "Verifying..." : "Verify"}
           </button>
-        {status && <p className="mt-4 text-green-600">{status}</p>}
+          {status && <p className="mt-4 text-green-600">{status}</p>}
         </form>
       </div>
     </main>
