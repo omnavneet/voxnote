@@ -4,7 +4,7 @@ import { storeEmbedding } from "../services/embedding.service.js";
 
 export async function fetchNotes(req, res) {
   try {
-    const userId = req.user?.sub; // from auth middleware
+    const userId = req.user?.sub; 
     const notes = await getAllNotes(userId);
     res.json(notes);
   } catch (err) {

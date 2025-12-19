@@ -3,6 +3,7 @@ import "dotenv/config";
 import notesRoutes from "./routes/notes.routes.js";
 import ragRoutes from "./routes/rag.routes.js";
 import authRoutes from "./routes/auth.routes.js";
+import tasksRoutes from "./routes/tasks.routes.js";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 
@@ -18,6 +19,7 @@ app.use(
 
 app.use(cookieParser());
 
+app.use("/tasks", tasksRoutes);
 app.use("/auth", authRoutes);
 app.use("/notes", notesRoutes);
 app.use("/rag", ragRoutes);

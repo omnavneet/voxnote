@@ -5,9 +5,10 @@ import { requireAuth } from "../middleware/auth.middleware.js";
 
 const router = express.Router();
 
-router.post("/summarize", requireAuth, summarizeNote);
-router.get("/", requireAuth, fetchNotes);
-router.post("/", requireAuth, addNote);
-router.get("/:noteId", requireAuth, fetchNoteById);
+router.use(requireAuth);
+router.post("/summarize", summarizeNote);
+router.get("/", fetchNotes);
+router.post("/", addNote);
+router.get("/:noteId", fetchNoteById);
 
 export default router;
