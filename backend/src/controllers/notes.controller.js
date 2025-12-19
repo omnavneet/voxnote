@@ -4,7 +4,7 @@ import { storeEmbedding } from "../services/embedding.service.js";
 
 export async function fetchNotes(req, res) {
   try {
-    const userId = req.user?.sub; 
+    const userId = req.user?.sub;
     const notes = await getAllNotes(userId);
     res.json(notes);
   } catch (err) {
@@ -50,7 +50,7 @@ export async function fetchNoteById(req, res) {
     }
     res.json(note);
   } catch (err) {
-    console.error(err); 
+    console.error(err);
     res.status(500).json({ error: "Failed to fetch note" });
   }
 }

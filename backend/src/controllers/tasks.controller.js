@@ -1,9 +1,5 @@
 import crypto from "crypto";
-import {
-    getAllTasks,
-    createTask,
-    deleteTask,
-} from "../services/tasks.store.js";
+import { getAllTasks, createTask, deleteTask, } from "../services/tasks.store.js";
 
 export async function fetchTasks(req, res) {
     try {
