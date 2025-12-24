@@ -1,4 +1,4 @@
-import { ddb } from "../config/dynamodb";
+import { ddb } from "../config/dynamodb.js";
 import { PutCommand, QueryCommand, } from "@aws-sdk/lib-dynamodb";
 
 const TABLE = "Timetable";

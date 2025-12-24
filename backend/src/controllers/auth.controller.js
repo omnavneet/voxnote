@@ -97,6 +97,7 @@ export const logout = async (req, res) => {
   res.clearCookie("accessToken", { path: "/" });
   res.clearCookie("idToken", { path: "/" });
   res.clearCookie("refreshToken", { path: "/" });
+
   return res.status(200).json({
     message: "Logout successful",
   });

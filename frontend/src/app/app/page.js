@@ -1,8 +1,9 @@
 "use client";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Home, Calendar, FileText, Headphones, Bot, User } from "lucide-react";
-import HomeContent from "./components/HomeContent"; 
+import { Home, Calendar, FileText, Headphones, Bot, User, LogOut } from "lucide-react";
+import HomeContent from "./components/HomeContent";
+import Timetable from "./components/Timetable"; 
 
 export default function DashboardPage() {
   const [tasks, setTasks] = useState([]);
@@ -15,6 +16,14 @@ export default function DashboardPage() {
       credentials: "include",
     });
     setTasks(await res.json());
+  }
+
+  async function handleLogout() {
+    await fetch("http://localhost:5000/auth/logout", {
+      method: "POST",
+      credentials: "include",
+    });
+    window.location.href = "/sign-in";
   }
 
   useEffect(() => {
@@ -49,11 +58,7 @@ export default function DashboardPage() {
           />
         );
       case "timetable":
-        return (
-          <div className="text-white text-xs text-center py-20">
-            Timetable View Coming Soon...
-          </div>
-        );
+        return <Timetable />;
       case "notes":
         return (
           <div className="text-white text-xs text-center py-20">
@@ -96,7 +101,7 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
       {/* Ambient glow effect */}
       <div className="fixed inset-0 bg-gradient-radial from-orange-500/5 via-transparent to-transparent pointer-events-none" />
-      
+
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
@@ -122,7 +127,7 @@ export default function DashboardPage() {
       </motion.div>
 
       {/* Dynamic Main Content */}
-      <div className="relative px-8 pb-32 max-w-6xl mx-auto">
+      <div className="relative px-8 pb-32 max-w-6xl mx-auto min-h-screen">
         <AnimatePresence mode="wait">
           <motion.div
             key={activeNav}
@@ -155,11 +160,10 @@ export default function DashboardPage() {
             <motion.button
               key={id}
               onClick={() => setActiveNav(id)}
-              className={`relative p-3 rounded-full transition-colors ${
-                activeNav === id
-                  ? "text-orange-400"
-                  : "text-slate-400 hover:text-slate-200"
-              }`}
+              className={`relative p-3 rounded-full transition-colors ${activeNav === id
+                ? "text-orange-400"
+                : "text-slate-400 hover:text-slate-200"
+                }`}
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
               title={label}
@@ -176,6 +180,28 @@ export default function DashboardPage() {
           ))}
         </div>
       </motion.nav>
+
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4, type: "spring", stiffness: 200 }}
+        className=" fixed bottom-8 right-20 p-1 rounded-full bg-white/5 border border-white/10 backdrop-blur-2xl shadow-2xl "
+      >
+        <motion.button
+          onClick={() => {
+            handleLogout();
+          }}
+          className=" group relative p-3 rounded-full text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all
+    "
+          whileHover={{ scale: 1.08 }}
+          whileTap={{ scale: 0.95 }}
+          title="Logout"
+        >
+          <LogOut size={16} strokeWidth={1.6} />
+        </motion.button>
+      </motion.div>
+
+
     </div>
   );
 }
