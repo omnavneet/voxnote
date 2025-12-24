@@ -1,10 +1,12 @@
 # VoxNote Schema
 
 ## User
+
 Stored in Cognito only.
 Derived at runtime from JWT.
 
 Fields:
+
 - userId (Cognito sub)
 - email
 - name
@@ -12,21 +14,26 @@ Fields:
 ---
 
 ## Note
+
 Core memory unit.
 
 Fields:
-- userId (string)
-- noteId (string, UUID)
-- title (string)
-- content (string)          # full text
-- summary (string | null)   # AI summary
-- type (text | pdf | audio | interview | ai)
-- createdAt (ISO string)
-- updatedAt (ISO string)
+- userId
+- noteId
+- title
+- content
+- summary
+- type
+- createdAt
+- updatedAt
+- embeddingId
+- metadata
 
-- fileUrl (string | null)   # S3 PDF/audio
-- embeddingId (string | null)
-- metadata (object)
+- attachment (object | null)
+  - key
+  - filename
+  - mimetype
+  - size
 
 DynamoDB:
 Table: Notes
@@ -39,9 +46,11 @@ Namespace: userId
 Metadata: noteId, type
 
 ## Task
+
 Dashboard-only, short-lived.
 
 Fields:
+
 - userId
 - taskId
 - text
@@ -54,9 +63,11 @@ PK: userId
 SK: taskId
 
 ## TimetableSlot
+
 Weekly visual planner.
 
 Fields:
+
 - userId
 - slotId (day-hour, e.g. Mon-14)
 - day (Mon..Sun)
@@ -71,9 +82,11 @@ PK: userId
 SK: slotId
 
 ## AudioSession
+
 Temporary before conversion to Note.
 
 Fields:
+
 - userId
 - audioId
 - s3Url

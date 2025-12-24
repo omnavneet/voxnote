@@ -1,6 +1,8 @@
-import { getAllNotes, createNote, getNoteById } from "../services/notes.store.js";
+import { getAllNotes, createNote, getNoteById, deleteNote } from "../services/notes.store.js";
 import { summarizeGraph } from "../graphs/summarize.graph.js";
 import { storeEmbedding } from "../services/embedding.service.js";
+import { uploadFile, deleteFile } from "../services/files.service.js";
+import { randomUUID } from "crypto";
 
 export async function fetchNotes(req, res) {
   try {
@@ -16,21 +18,31 @@ export async function fetchNotes(req, res) {
 export async function addNote(req, res) {
   try {
     const userId = req.user?.sub;
-    const { title, content, type, fileUrl } = req.body;
+    const { title, content, type } = req.body;
+    const file = req.file;
 
     if (!title || !content || !type) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    // 1. Save note to DB
+    const noteId = randomUUID();
+    let attachment = null;
+
+    // 1. Upload file if present
+    if (file) {
+      attachment = await uploadFile({ userId, noteId, file });
+    }
+
+    // 2. Save note to DB
     const savedNote = await createNote(userId, {
+      noteId,
       title,
       content,
       type,
-      fileUrl,
+      attachment,
     });
 
-    // 2. Generate embedding (non-blocking mindset)
+    // 3. Generate embedding
     await storeEmbedding(savedNote);
 
     res.status(201).json(savedNote);
@@ -39,6 +51,7 @@ export async function addNote(req, res) {
     res.status(500).json({ error: "Failed to create note" });
   }
 }
+
 
 export async function fetchNoteById(req, res) {
   try {
@@ -73,3 +86,25 @@ export async function summarizeNote(req, res) {
     res.status(500).json({ error: "Summarization failed" });
   }
 }
+
+export async function deleteNoteById(req, res) {
+  try {
+    const userId = req.user.sub;
+    const { noteId } = req.params;
+
+    const note = await getNoteById(userId, noteId);
+    if (!note) return res.status(404).json({ error: "Not found" });
+
+    if (note.attachment?.key) {
+      await deleteFile(note.attachment.key);
+    }
+
+    await deleteNote(userId, noteId);
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Delete failed" });
+  }
+}
+

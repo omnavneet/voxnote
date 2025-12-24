@@ -2,20 +2,31 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Home, Calendar, FileText, Headphones, Bot, User, LogOut } from "lucide-react";
-import HomeContent from "./components/HomeContent";
-import Timetable from "./components/Timetable"; 
+import HomeContent from "./components/homeContent";
+import Timetable from "./components/timetable";
+import Notes from "./components/notes";
 
 export default function DashboardPage() {
   const [tasks, setTasks] = useState([]);
   const [activeNav, setActiveNav] = useState("home");
   const [timerRunning, setTimerRunning] = useState(false);
   const [seconds, setSeconds] = useState(0);
+  const [todayFocusedSec, setTodayFocusedSec] = useState(0);
 
   async function fetchTasks() {
     const res = await fetch("http://localhost:5000/tasks", {
+      method: "GET",
       credentials: "include",
     });
     setTasks(await res.json());
+  }
+
+  async function fetchTodayFocused() {
+    const res = await fetch("http://localhost:5000/timer/today", {
+      credentials: "include",
+    });
+    const data = await res.json();
+    setTodayFocusedSec(data.totalSec || 0);
   }
 
   async function handleLogout() {
@@ -28,6 +39,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     fetchTasks();
+    fetchTodayFocused();
   }, []);
 
   useEffect(() => {
@@ -36,12 +48,16 @@ export default function DashboardPage() {
       interval = setInterval(() => {
         setSeconds((s) => s + 1);
       }, 1000);
+    } else if (!timerRunning && seconds > 0) {
+      // When timer stops, update the daily total
+      fetchTodayFocused();
     }
     return () => clearInterval(interval);
-  }, [timerRunning]);
+  }, [timerRunning, seconds]);
 
-  const totalFocusedMinutes = Math.floor(seconds / 60);
-  const completedTasks = 0;
+  const totalFocusedMinutes = Math.floor(
+    (todayFocusedSec + (timerRunning ? seconds : 0)) / 60
+  );
 
   // Helper function to switch views without page refresh
   const renderContent = () => {
@@ -61,9 +77,7 @@ export default function DashboardPage() {
         return <Timetable />;
       case "notes":
         return (
-          <div className="text-white text-xs text-center py-20">
-            Notes View Coming Soon...
-          </div>
+          <Notes />
         );
       case "audio":
         return (
@@ -118,10 +132,10 @@ export default function DashboardPage() {
         </div>
         <div className="text-right space-y-0.5">
           <p className="text-[10px] text-slate-400 tracking-wide">
-            {totalFocusedMinutes}m focused
+            {tasks.length} tasks
           </p>
           <p className="text-[10px] text-slate-400 tracking-wide">
-            {tasks.length} tasks · {completedTasks} done
+            {totalFocusedMinutes}m focused
           </p>
         </div>
       </motion.div>
@@ -185,14 +199,11 @@ export default function DashboardPage() {
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4, type: "spring", stiffness: 200 }}
-        className=" fixed bottom-8 right-20 p-1 rounded-full bg-white/5 border border-white/10 backdrop-blur-2xl shadow-2xl "
+        className="fixed bottom-8 right-20 p-1 rounded-full bg-white/5 border border-white/10 backdrop-blur-2xl shadow-2xl"
       >
         <motion.button
-          onClick={() => {
-            handleLogout();
-          }}
-          className=" group relative p-3 rounded-full text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all
-    "
+          onClick={handleLogout}
+          className="group relative p-3 rounded-full text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all"
           whileHover={{ scale: 1.08 }}
           whileTap={{ scale: 0.95 }}
           title="Logout"
@@ -200,8 +211,6 @@ export default function DashboardPage() {
           <LogOut size={16} strokeWidth={1.6} />
         </motion.button>
       </motion.div>
-
-
     </div>
   );
 }

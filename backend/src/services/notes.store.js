@@ -1,5 +1,5 @@
 import { ddb } from "../config/dynamodb.js";
-import {PutCommand, QueryCommand, GetCommand,} from "@aws-sdk/lib-dynamodb";
+import { PutCommand, QueryCommand, GetCommand, DeleteCommand } from "@aws-sdk/lib-dynamodb";
 import { randomUUID } from "crypto";
 
 const notes = new Map();
@@ -10,12 +10,12 @@ export async function createNote(userId, data) {
 
   const note = {
     userId,
-    noteId: randomUUID(),
+    noteId: data.noteId || randomUUID(),
     title: data.title,
     content: data.content,
     summary: data.summary || null,
     type: data.type,
-    fileUrl: data.fileUrl || null,
+    attachment: data.attachment || null,
     embeddingId: null,
     metadata: data.metadata || {},
     createdAt: now,
@@ -31,6 +31,7 @@ export async function createNote(userId, data) {
 
   return note;
 }
+
 
 export async function getAllNotes(userId) {
   const result = await ddb.send(
@@ -55,4 +56,13 @@ export async function getNoteById(userId, noteId) {
   );
 
   return result.Item;
+}
+
+export async function deleteNote(userId, noteId) {
+  await ddb.send(
+    new DeleteCommand({
+      TableName: TABLE,
+      Key: { userId, noteId },
+    })
+  );
 }

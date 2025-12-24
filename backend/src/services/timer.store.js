@@ -1,5 +1,5 @@
 import { PutCommand, QueryCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
-import { ddb } from "../db.js";
+import { ddb } from "../config/dynamodb.js";
 
 const TABLE = "FocusSessions";
 
@@ -65,4 +65,22 @@ export async function stopSession(userId) {
     );
 
     return { ...session, endTime, durationSec };
+}
+
+export async function getTodayTotal(userId) {
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const res = await ddb.send(
+        new QueryCommand({
+            TableName: "FocusSessions",
+            KeyConditionExpression: "userId = :u AND startTime >= :s",
+            ExpressionAttributeValues: {
+                ":u": userId,
+                ":s": startOfDay.toISOString(),
+            },
+        })
+    );
+
+    return res.Items.reduce((sum, s) => sum + (s.durationSec || 0), 0);
 }

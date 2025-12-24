@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Play, Pause, X } from "lucide-react";
 
@@ -25,6 +25,20 @@ export default function HomeContent({ tasks, setTasks, seconds, timerRunning, se
       credentials: "include",
     });
     setTasks((t) => t.filter((task) => task.taskId !== taskId));
+  }
+
+  async function startFocus() {
+    await fetch("http://localhost:5000/timer/start", {
+      method: "POST",
+      credentials: "include",
+    });
+  }
+
+  async function stopFocus() {
+    await fetch("http://localhost:5000/timer/stop", {
+      method: "POST",
+      credentials: "include",
+    });
   }
 
   const formatTime = (secs) => {
@@ -56,7 +70,15 @@ export default function HomeContent({ tasks, setTasks, seconds, timerRunning, se
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            onClick={() => setTimerRunning(!timerRunning)}
+            onClick={async () => {
+              if (!timerRunning) {
+                await startFocus();
+                setTimerRunning(true);
+              } else {
+                await stopFocus();
+                setTimerRunning(false);
+              }
+            }}
             className="flex-1 flex items-center justify-center gap-2 py-3 text-xs border border-white/20 rounded-xl hover:bg-white/5 transition-all text-slate-300 font-light"
           >
             {timerRunning ? (
@@ -74,7 +96,10 @@ export default function HomeContent({ tasks, setTasks, seconds, timerRunning, se
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            onClick={() => {
+            onClick={async () => {
+              if (timerRunning) {
+                await stopFocus();
+              }
               setSeconds(0);
               setTimerRunning(false);
             }}
