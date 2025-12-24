@@ -5,6 +5,7 @@ import ragRoutes from "./routes/rag.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 import tasksRoutes from "./routes/tasks.routes.js";
 import timetableRoutes from "./routes/timetable.routes.js";
+import timerRoutes from "./routes/timer.routes.js";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 
@@ -25,5 +26,6 @@ app.use("/auth", authRoutes);
 app.use("/notes", notesRoutes);
 app.use("/rag", ragRoutes);
 app.use("/timetable", timetableRoutes);
+app.use("/timer", timerRoutes);
 
 export default app;
