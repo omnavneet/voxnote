@@ -1,7 +1,8 @@
 import { getAllNotes, createNote, getNoteById, deleteNote } from "../services/notes.store.js";
 import { summarizeGraph } from "../graphs/summarize.graph.js";
+import { summarizeAllNotes } from "../graphs/dashboardSummarize.graph.js";
 import { storeEmbedding } from "../services/embedding.service.js";
-import { uploadFile, deleteFile } from "../services/files.service.js";
+import { uploadFile, deleteFile, getSignedUrl } from "../services/files.service.js";
 import { randomUUID } from "crypto";
 
 export async function fetchNotes(req, res) {
@@ -18,7 +19,7 @@ export async function fetchNotes(req, res) {
 export async function addNote(req, res) {
   try {
     const userId = req.user?.sub;
-    const { title, content, type } = req.body;
+    const { title, content, type, summary } = req.body;
     const file = req.file;
 
     if (!title || !content || !type) {
@@ -40,6 +41,7 @@ export async function addNote(req, res) {
       content,
       type,
       attachment,
+      summary: summary || null,
     });
 
     // 3. Generate embedding
@@ -52,14 +54,18 @@ export async function addNote(req, res) {
   }
 }
 
-
 export async function fetchNoteById(req, res) {
   try {
     const userId = req.user?.sub;
     const { noteId } = req.params;
     const note = await getNoteById(userId, noteId);
+
     if (!note) {
       return res.status(404).json({ error: "Note not found" });
+    }
+
+    if (note.attachment?.key) {
+      note.attachment.url = await getSignedUrl(note.attachment.key);
     }
     res.json(note);
   } catch (err) {
@@ -108,3 +114,21 @@ export async function deleteNoteById(req, res) {
   }
 }
 
+export async function summarizeAll(req, res) {
+  try {
+    const { content } = req.body;
+
+    if (!content) {
+      return res.status(400).json({ error: "content is required" });
+    }
+
+    const result = await summarizeAllNotes.invoke({
+      text: content,
+    });
+
+    res.json({ summary: result.summary });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Summarization failed" });
+  }
+}

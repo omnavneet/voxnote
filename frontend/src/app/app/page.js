@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Home, Calendar, FileText, Headphones, Bot, User, LogOut } from "lucide-react";
+import { Home, Calendar, FileText, Bot, User, LogOut, Image } from "lucide-react";
 import HomeContent from "./components/homeContent";
 import Timetable from "./components/timetable";
 import Notes from "./components/notes";
@@ -79,16 +79,16 @@ export default function DashboardPage() {
         return (
           <Notes />
         );
-      case "audio":
-        return (
-          <div className="text-white text-xs text-center py-20">
-            Audio View Coming Soon...
-          </div>
-        );
       case "interview":
         return (
           <div className="text-white text-xs text-center py-20">
             Interview View Coming Soon...
+          </div>
+        );
+      case "image":
+        return (
+          <div className="text-white text-xs text-center py-20">
+            Image Gallery Coming Soon...
           </div>
         );
       case "profile":
@@ -141,7 +141,7 @@ export default function DashboardPage() {
       </motion.div>
 
       {/* Dynamic Main Content */}
-      <div className="relative px-8 pb-32 max-w-6xl mx-auto min-h-screen">
+      <div className="relative px-8 pb-32 max-w-7xl mx-auto min-h-screen">
         <AnimatePresence mode="wait">
           <motion.div
             key={activeNav}
@@ -165,9 +165,9 @@ export default function DashboardPage() {
         <div className="flex items-center gap-1">
           {[
             { id: "home", icon: Home, label: "Home" },
-            { id: "timetable", icon: Calendar, label: "Timetable" },
             { id: "notes", icon: FileText, label: "Notes" },
-            { id: "audio", icon: Headphones, label: "Audio" },
+            { id: "image", icon: Image, label: "Gallery" },
+            { id: "timetable", icon: Calendar, label: "Timetable" },
             { id: "interview", icon: Bot, label: "Interview" },
             { id: "profile", icon: User, label: "Profile" },
           ].map(({ id, icon: Icon, label }) => (

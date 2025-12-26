@@ -63,7 +63,7 @@ export default function Timetable() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-4">
+    <div className="max-w-7xl mx-auto px-6 py-4">
       <h2 className="text-xl font-medium text-white mb-3">
         Weekly Timetable
       </h2>
@@ -92,7 +92,7 @@ export default function Timetable() {
               (_, i) => START_HOUR + i
             ).map((hour) => (
               <tr key={hour}>
-                <td className="border border-white/10 px-3 py-3 text-xs text-white/60 font-mono">
+                <td className="border border-white/10 px-2 py-2 text-xs text-white/60 font-mono">
                   {hour}:00
                 </td>
 

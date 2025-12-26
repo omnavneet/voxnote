@@ -25,3 +25,15 @@ export async function deleteFile(key) {
 
     await supabase.storage.from(process.env.SUPABASE_BUCKET).remove([key]);
 }
+
+export async function getSignedUrl(key) {
+    if (!key) return null;
+
+    const { data, error } = await supabase.storage
+        .from(process.env.SUPABASE_BUCKET)
+        .createSignedUrl(key, 60 * 60); // 1 hour
+
+    if (error) throw error;
+
+    return data.signedUrl;
+}
