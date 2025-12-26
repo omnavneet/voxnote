@@ -4,7 +4,7 @@ export async function uploadFile({ userId, noteId, file }) {
     const path = `notes/${userId}/${noteId}/${file.originalname}`;
 
     const { error } = await supabase.storage
-        .from(process.env.SUPABASE_BUCKET)
+        .from(process.env.SUPABASE_BUCKET_1)
         .upload(path, file.buffer, {
             contentType: file.mimetype,
             upsert: false,
@@ -23,14 +23,14 @@ export async function uploadFile({ userId, noteId, file }) {
 export async function deleteFile(key) {
     if (!key) return;
 
-    await supabase.storage.from(process.env.SUPABASE_BUCKET).remove([key]);
+    await supabase.storage.from(process.env.SUPABASE_BUCKET_1).remove([key]);
 }
 
 export async function getSignedUrl(key) {
     if (!key) return null;
 
     const { data, error } = await supabase.storage
-        .from(process.env.SUPABASE_BUCKET)
+        .from(process.env.SUPABASE_BUCKET_1)
         .createSignedUrl(key, 60 * 60); // 1 hour
 
     if (error) throw error;
