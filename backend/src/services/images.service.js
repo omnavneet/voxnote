@@ -1,6 +1,6 @@
 import { supabase } from "../config/supabase.js";
 
-export async function uploadImage({ userId, file }) {
+export async function uploadImageService({ userId, file }) {
     const ext = file.originalname.split(".").pop().toLowerCase();
     if (!["jpg", "jpeg", "png", "webp"].includes(ext)) {
         throw new Error("Only images allowed");
@@ -25,7 +25,7 @@ export async function uploadImage({ userId, file }) {
     };
 }
 
-export async function deleteImage(key) {
+export async function deleteImageService(key) {
     if (!key) return;
     await supabase.storage.from(process.env.SUPABASE_BUCKET_2).remove([key]);
 }

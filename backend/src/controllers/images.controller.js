@@ -1,5 +1,5 @@
 import { createImage, getAllImages, getImageById, deleteImage } from "../services/images.store.js";
-import { uploadImage, deleteImageFile, getImageSignedUrl } from "../services/images.service.js";
+import { uploadImageService, deleteImageService, getImageUrl } from "../services/images.service.js";
 import { randomUUID } from "crypto";
 
 export async function uploadUserImage(req, res) {
@@ -11,7 +11,7 @@ export async function uploadUserImage(req, res) {
 
         const imageId = randomUUID();
 
-        const meta = await uploadImage({ userId, imageId, file });
+        const meta = await uploadImageService({ userId, imageId, file });
 
         const image = await createImage(userId, {
             imageId,
@@ -33,7 +33,7 @@ export async function fetchImages(req, res) {
         const withUrls = await Promise.all(
             images.map(async img => ({
                 ...img,
-                url: await getImageSignedUrl(img.key),
+                url: await getImageUrl(img.key),
             }))
         );
 
@@ -52,7 +52,7 @@ export async function deleteUserImage(req, res) {
         const image = await getImageById(userId, imageId);
         if (!image) return res.status(404).json({ error: "Not found" });
 
-        await deleteImageFile(image.key);
+        await deleteImageService(image.key);
         await deleteImage(userId, imageId);
 
         res.json({ success: true });

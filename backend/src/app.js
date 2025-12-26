@@ -28,6 +28,6 @@ app.use("/notes", notesRoutes);
 app.use("/rag", ragRoutes);
 app.use("/timetable", timetableRoutes);
 app.use("/timer", timerRoutes);
-app.use("/images", imagesRoutes);
+app.use("/", imagesRoutes);
 
 export default app;

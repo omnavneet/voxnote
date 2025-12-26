@@ -2,7 +2,7 @@ import { ddb } from "../config/dynamodb.js";
 import { PutCommand, QueryCommand, GetCommand, DeleteCommand } from "@aws-sdk/lib-dynamodb";
 import { randomUUID } from "crypto";
 
-const TABLE = "UserImages";
+const TABLE = "Images";
 
 export async function createImage(userId, data) {
     const now = new Date().toISOString();
