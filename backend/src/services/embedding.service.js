@@ -32,9 +32,23 @@ export async function storeEmbedding(note) {
       values: vector,
       metadata: {
         userId: note.userId,
-        type: note.type,
         text: note.content
       }
     }
   ]);
+}
+
+export async function deleteEmbedding(noteId, userId) {
+  try {
+    const id = String(noteId);
+    const index = getIndex(userId);
+
+    console.log("Deleting embedding", { id, userId });
+
+    await index.deleteOne(id);
+
+    console.log("Delete call completed");
+  } catch (err) {
+    console.error("deleteEmbedding failed:", err);
+  }
 }

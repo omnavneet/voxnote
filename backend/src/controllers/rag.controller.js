@@ -2,7 +2,7 @@ import { askRag } from "../services/rag.service.js";
 
 export async function queryRag(req, res) {
   const { question } = req.body;
-  const userId = "demo-user"; // temp until Cognito
+  const userId = req.user?.sub;
 
   if (!question) {
     return res.json({ error: "Question required" });

@@ -164,12 +164,12 @@ export default function DashboardPage() {
       >
         <div className="flex items-center gap-1">
           {[
-            { id: "home", icon: Home, label: "Home" },
+            { id: "home", icon: Home, label: "Dashboard" },
             { id: "notes", icon: FileText, label: "Notes" },
-            { id: "image", icon: Image, label: "Gallery" },
-            { id: "timetable", icon: Calendar, label: "Timetable" },
-            { id: "interview", icon: Bot, label: "Interview" },
-            { id: "profile", icon: User, label: "Profile" },
+            { id: "image", icon: Image, label: "Journal" },
+            { id: "timetable", icon: Calendar, label: "Schedule" },
+            { id: "interview", icon: Bot, label: "Coach" },
+            { id: "profile", icon: User, label: "Account" },
           ].map(({ id, icon: Icon, label }) => (
             <motion.button
               key={id}

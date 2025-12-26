@@ -34,13 +34,13 @@ export async function askRag({ question, userId }) {
 
   // build context
   const context = res.matches
-    .map(m => `- ${m.metadata?.type || "note"}: ${m.metadata?.text || ""}`)
+    .map(m => `- ${"content"}: ${m.metadata?.text || ""}`)
     .join("\n");
 
   // ask LLM
   const prompt = `
 Use the notes below to answer the question.
-If the answer is not present, say "I don't know".
+If the answer is not present, say "You built it wrong".
 
 Notes:
 ${context}

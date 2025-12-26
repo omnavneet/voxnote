@@ -65,7 +65,7 @@ export default function Timetable() {
   return (
     <div className="max-w-7xl mx-auto px-6 py-4">
       <h2 className="text-xl font-medium text-white mb-3">
-        Weekly Timetable
+        Weekly Schedule
       </h2>
 
       <div className="overflow-x-auto rounded-lg border border-white/10 bg-white/5 backdrop-blur-xl shadow-lg">

@@ -1,7 +1,7 @@
 import { getAllNotes, createNote, getNoteById, deleteNote } from "../services/notes.store.js";
 import { summarizeGraph } from "../graphs/summarize.graph.js";
 import { summarizeAllNotes } from "../graphs/dashboardSummarize.graph.js";
-import { storeEmbedding } from "../services/embedding.service.js";
+import { deleteEmbedding, storeEmbedding } from "../services/embedding.service.js";
 import { uploadFile, deleteFile, getSignedUrl } from "../services/files.service.js";
 import { randomUUID } from "crypto";
 
@@ -104,9 +104,8 @@ export async function deleteNoteById(req, res) {
     if (note.attachment?.key) {
       await deleteFile(note.attachment.key);
     }
-
     await deleteNote(userId, noteId);
-
+    await deleteEmbedding(noteId, userId);
     res.json({ success: true });
   } catch (err) {
     console.error(err);

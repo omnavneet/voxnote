@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, FileText, Sparkles, X, Trash2, Maximize2, Minimize2, Upload } from "lucide-react";
+import { Plus, FileText, Sparkles, X, Trash2, Maximize2, Minimize2, Upload, Send } from "lucide-react";
 
 export default function NotesPage() {
     const [notes, setNotes] = useState([]);
@@ -15,6 +15,8 @@ export default function NotesPage() {
     const [showCreate, setShowCreate] = useState(false);
     const [fullscreen, setFullscreen] = useState(null);
     const [deleteConfirm, setDeleteConfirm] = useState(null);
+    const [question, setQuestion] = useState("");
+    const [answer, setAnswer] = useState("");
 
     useEffect(() => {
         fetch("http://localhost:5000/notes", { credentials: "include" })
@@ -22,6 +24,20 @@ export default function NotesPage() {
             .then(setNotes)
             .catch((err) => console.error("Failed to load notes:", err));
     }, []);
+
+    function askQuestion() {
+        if (!question.trim()) return;
+
+        fetch("http://localhost:5000/rag/query", {
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ question }),
+        })
+            .then((r) => r.json())
+            .then((d) => setAnswer(d.answer))
+            .catch((err) => console.error("Failed to get answer:", err));
+    }
 
     function openNote(id) {
         fetch(`http://localhost:5000/notes/${id}`, { credentials: "include" })
@@ -141,7 +157,7 @@ export default function NotesPage() {
     }
 
     return (
-        <div className="space-y-6 max-w-500 mx-auto">
+        <div className="space-y-6 max-w-7xl mx-auto">
             <style>{`
                 .custom-scrollbar::-webkit-scrollbar {
                     width: 6px;
@@ -202,16 +218,70 @@ export default function NotesPage() {
             </AnimatePresence>
 
             {/* Header Actions */}
-            <div className="flex gap-3">
+            <div className="flex gap-3 items-start">
                 <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => setShowCreate(!showCreate)}
-                    className="flex items-center gap-2 px-4 py-2.5 text-xs border border-white/20 rounded-xl hover:bg-white/5 transition-all text-slate-300 font-light"
+                    className="flex items-center gap-2 px-4 py-3.5 text-xs border border-white/20 rounded-xl hover:bg-white/5 transition-all text-slate-300 font-light"
                 >
                     <Plus size={14} strokeWidth={1.5} />
                     New Note
                 </motion.button>
+
+                <div className="flex-1 space-y-3">
+                    <div className="flex gap-2">
+                        <input
+                            value={question}
+                            onChange={(e) => setQuestion(e.target.value)}
+                            onKeyPress={(e) => e.key === 'Enter' && askQuestion()}
+                            className="flex-1 text-sm px-5 py-3 border border-white/20 rounded-xl focus:outline-none focus:border-purple-500/50 bg-white/5 placeholder:text-slate-500 text-slate-200 font-light backdrop-blur-sm transition-all"
+                            placeholder="Ask a question about your notes..."
+                        />
+                        <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={askQuestion}
+                            className="px-5 py-3 text-xs border border-purple-500/30 rounded-xl bg-gradient-to-r from-purple-500/10 to-purple-600/10 hover:from-purple-500/20 hover:to-purple-600/20 transition-all text-purple-400 font-light flex items-center gap-2"
+                        >
+                            <Send size={14} strokeWidth={1.5} />
+                            Ask
+                        </motion.button>
+                    </div>
+
+                    <AnimatePresence>
+                        {answer && (
+                            <motion.div
+                                initial={{ opacity: 0, y: -10, height: 0 }}
+                                animate={{ opacity: 1, y: 0, height: "auto" }}
+                                exit={{ opacity: 0, y: -10, height: 0 }}
+                                className="overflow-hidden"
+                            >
+                                <div className="relative px-6 py-4 bg-gradient-to-br from-purple-500/10 to-purple-600/5 border border-purple-500/20 rounded-xl backdrop-blur-sm">
+                                    <button
+                                        onClick={() => setAnswer("")}
+                                        className="absolute top-3 right-3 p-1 rounded-lg hover:bg-white/10 transition-colors"
+                                    >
+                                        <X size={14} className="text-slate-400 hover:text-slate-200" strokeWidth={1.5} />
+                                    </button>
+                                    <div className="flex items-start gap-3">
+                                        <div className="mt-0.5 p-2 rounded-lg bg-purple-500/20 border border-purple-500/30">
+                                            <Sparkles size={14} className="text-purple-400" strokeWidth={1.5} />
+                                        </div>
+                                        <div className="flex-1 pr-6">
+                                            <p className="text-[10px] uppercase tracking-wider text-purple-400/80 mb-2 font-medium">
+                                                AI Answer
+                                            </p>
+                                            <p className="text-sm leading-relaxed text-slate-200 font-light">
+                                                {answer}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </div>
             </div>
 
             {/* Create Note Form */}
@@ -303,14 +373,16 @@ export default function NotesPage() {
             </AnimatePresence>
 
             {/* Notes Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="grid gap-8" style={{ gridTemplateColumns: selected ? '380px 1fr' : '380px 1fr' }}>
                 {/* Notes List */}
                 <motion.div
+                    layout
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-2xl"
                 >
-                    <h3 className="text-[10px] uppercase tracking-[0.15em] text-slate-400 mb-6 font-medium">
+                    <h3 className="text-[10px] uppercase tracking-[0.15em] text-slate-400 mb-6 font-light">
                         All Notes ({notes.length})
                     </h3>
                     <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
@@ -385,18 +457,19 @@ export default function NotesPage() {
 
                 {/* Note Detail */}
                 <motion.div
+                    layout
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1 }}
                     className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-2xl"
                 >
-                    <h3 className="text-[10px] uppercase tracking-[0.15em] text-slate-400 mb-6 font-medium">
+                    <h3 className="text-[10px] uppercase tracking-[0.15em] text-slate-400 mb-6 font-light">
                         Note Details
                     </h3>
                     {selected ? (
                         <div className="space-y-6 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
                             <div>
-                                <p className="text-[10px] text-slate-500 mb-3 uppercase tracking-wide font-medium">
+                                <p className="text-[10px] text-slate-500 mb-3 uppercase tracking-wide font-light">
                                     Title
                                 </p>
                                 <p className="text-lg text-slate-200 font-light leading-relaxed">
@@ -406,7 +479,7 @@ export default function NotesPage() {
 
                             {selected.content && (
                                 <div>
-                                    <p className="text-[10px] text-slate-500 mb-3 uppercase tracking-wide font-medium">
+                                    <p className="text-[10px] text-slate-500 mb-3 uppercase tracking-wide font-light">
                                         Content
                                     </p>
                                     <p className="text-sm text-slate-300 leading-relaxed font-light whitespace-pre-wrap">
@@ -417,7 +490,7 @@ export default function NotesPage() {
 
                             {selected.summary && (
                                 <div>
-                                    <p className="text-[10px] text-slate-500 mb-3 uppercase tracking-wide font-medium">
+                                    <p className="text-[10px] text-slate-500 mb-3 uppercase tracking-wide font-light">
                                         Summary
                                     </p>
                                     <div className="p-4 rounded-xl bg-purple-500/10 border border-purple-500/20">
@@ -430,7 +503,7 @@ export default function NotesPage() {
 
                             {selected.attachment && (
                                 <div>
-                                    <p className="text-[10px] text-slate-500 mb-3 uppercase tracking-wide font-medium">
+                                    <p className="text-[10px] text-slate-500 mb-3 uppercase tracking-wide font-light">
                                         Attachment
                                     </p>
                                     {renderAttachment(selected)}
