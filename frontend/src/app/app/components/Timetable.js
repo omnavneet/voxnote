@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Clock, X, Check } from "lucide-react";
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const START_HOUR = 8;
@@ -63,22 +65,27 @@ export default function Timetable() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-4">
-      <h2 className="text-xl font-medium text-white mb-3">
-        Weekly Schedule
-      </h2>
+    <div className="max-w-7xl mx-auto px-6 py-3 h-screen">
+      <div className="flex items-center gap-3 mb-3">
+        <div className="p-2 rounded-xl bg-orange-500/10 border border-orange-500/20">
+          <Clock size={18} className="text-orange-400" strokeWidth={1.5} />
+        </div>
+        <h2 className="text-lg font-light text-slate-200">
+          Weekly Schedule
+        </h2>
+      </div>
 
-      <div className="overflow-x-auto rounded-lg border border-white/10 bg-white/5 backdrop-blur-xl shadow-lg">
+      <div className="overflow-x-auto rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-2xl">
         <table className="w-full border-collapse text-sm text-white">
           <thead>
             <tr className="bg-white/5">
-              <th className="border border-white/10 px-3 py-2.5 text-left font-medium text-white/80 text-xs">
+              <th className="border border-white/10 px-4 py-2 text-left font-light text-slate-400 text-xs tracking-wider">
                 Time
               </th>
               {DAYS.map((day) => (
                 <th
                   key={day}
-                  className="border border-white/10 px-3 py-2.5 text-center font-medium text-white/80 text-xs"
+                  className="border border-white/10 px-4 py-2 text-center font-light text-slate-400 text-xs tracking-wider"
                 >
                   {day}
                 </th>
@@ -91,8 +98,8 @@ export default function Timetable() {
               { length: END_HOUR - START_HOUR },
               (_, i) => START_HOUR + i
             ).map((hour) => (
-              <tr key={hour}>
-                <td className="border border-white/10 px-2 py-2 text-xs text-white/60 font-mono">
+              <tr key={hour} className="hover:bg-white/5 transition-colors">
+                <td className="border border-white/10 px-4 py-3 text-xs text-slate-500 font-light">
                   {hour}:00
                 </td>
 
@@ -103,9 +110,15 @@ export default function Timetable() {
                     <td
                       key={day}
                       onClick={() => openEditor(day, hour)}
-                      className="border border-white/10 px-3 py-3 cursor-pointer hover:bg-white/10 transition-colors duration-150"
+                      className={`border border-white/10 px-4 py-3 cursor-pointer transition-all ${
+                        slot?.label
+                          ? "bg-orange-500/10 hover:bg-orange-500/20"
+                          : "hover:bg-white/10"
+                      }`}
                     >
-                      <span className="text-sm">{slot?.label || ""}</span>
+                      <span className="text-sm text-slate-300 font-light">
+                        {slot?.label || ""}
+                      </span>
                     </td>
                   );
                 })}
@@ -115,39 +128,72 @@ export default function Timetable() {
         </table>
       </div>
 
-      {activeSlot && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-xl bg-[#1b2432] border border-white/10 p-6">
-            <h3 className="text-white font-medium mb-4">
-              Edit slot ({activeSlot.day} {activeSlot.hour}:00)
-            </h3>
+      <AnimatePresence>
+        {activeSlot && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+            onClick={() => setActiveSlot(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-md rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 p-6 shadow-2xl"
+            >
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h3 className="text-slate-200 font-light text-lg mb-1">
+                    Edit Time Slot
+                  </h3>
+                  <p className="text-xs text-slate-500 font-light">
+                    {activeSlot.day} • {activeSlot.hour}:00 - {activeSlot.hour + 1}:00
+                  </p>
+                </div>
+                <button
+                  onClick={() => setActiveSlot(null)}
+                  className="p-2 rounded-lg hover:bg-white/10 transition-colors"
+                >
+                  <X size={16} className="text-slate-400" strokeWidth={1.5} />
+                </button>
+              </div>
 
-            <input
-              autoFocus
-              value={draftLabel}
-              onChange={(e) => setDraftLabel(e.target.value)}
-              placeholder="What are you doing?"
-              className="w-full rounded-lg bg-white/5 border border-white/10 px-4 py-2 text-white outline-none focus:ring-2 focus:ring-white/20"
-            />
+              <input
+                autoFocus
+                value={draftLabel}
+                onChange={(e) => setDraftLabel(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && saveSlot()}
+                placeholder="What are you doing?"
+                className="w-full rounded-xl bg-white/5 border border-white/20 px-4 py-3 text-slate-200 font-light text-sm placeholder:text-slate-500 outline-none focus:border-orange-500/50 transition-all"
+              />
 
-            <div className="flex justify-end gap-3 mt-6">
-              <button
-                onClick={() => setActiveSlot(null)}
-                className="px-4 py-2 text-sm text-white/70 hover:text-white"
-              >
-                Cancel
-              </button>
+              <div className="flex justify-end gap-3 mt-6">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => setActiveSlot(null)}
+                  className="px-4 py-2 text-sm text-slate-400 hover:text-slate-200 font-light transition-colors"
+                >
+                  Cancel
+                </motion.button>
 
-              <button
-                onClick={saveSlot}
-                className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white text-sm"
-              >
-                Save
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={saveSlot}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/30 text-orange-400 text-sm font-light transition-all"
+                >
+                  <Check size={14} strokeWidth={1.5} />
+                  Save
+                </motion.button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

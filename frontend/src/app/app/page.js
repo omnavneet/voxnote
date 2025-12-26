@@ -5,6 +5,7 @@ import { Home, Calendar, FileText, Bot, User, LogOut, Image } from "lucide-react
 import HomeContent from "./components/homeContent";
 import Timetable from "./components/timetable";
 import Notes from "./components/notes";
+import Gallery from "./components/gallery";
 
 export default function DashboardPage() {
   const [tasks, setTasks] = useState([]);
@@ -87,9 +88,7 @@ export default function DashboardPage() {
         );
       case "image":
         return (
-          <div className="text-white text-xs text-center py-20">
-            Image Gallery Coming Soon...
-          </div>
+          <Gallery />
         );
       case "profile":
         return (
