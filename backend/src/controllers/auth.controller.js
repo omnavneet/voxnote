@@ -1,4 +1,4 @@
-import { signInWithCognito, signUpWithCognito, verifyCognitoUser, } from "../services/cognitoAuth.service.js";
+import { signInWithCognito, signUpWithCognito, verifyCognitoUser, changeCognitoPassword, forgotCognitoPassword, confirmForgotCognitoPassword } from "../services/cognitoAuth.service.js";
 
 export const login = async (req, res) => {
   try {
@@ -102,3 +102,43 @@ export const logout = async (req, res) => {
     message: "Logout successful",
   });
 }
+
+/* CHANGE PASSWORD */
+export const changePassword = async (req, res) => {
+  try {
+    const { oldPassword, newPassword } = req.body;
+    const accessToken = req.cookies.accessToken;
+
+    await changeCognitoPassword(accessToken, oldPassword, newPassword);
+
+    return res.status(200).json({ message: "Password changed successfully" });
+  } catch (error) {
+    return res.status(400).json({ message: error.message });
+  }
+};
+
+/* FORGOT PASSWORD */
+export const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    await forgotCognitoPassword(email);
+
+    return res.status(200).json({ message: "Reset code sent to email" });
+  } catch (error) {
+    return res.status(400).json({ message: error.message });
+  }
+};
+
+/* CONFIRM FORGOT PASSWORD */
+export const confirmPassword = async (req, res) => {
+  try {
+    const { email, code, newPassword } = req.body;
+
+    await confirmForgotCognitoPassword(email, code, newPassword);
+
+    return res.status(200).json({ message: "Password reset successful" });
+  } catch (error) {
+    return res.status(400).json({ message: error.message });
+  }
+};

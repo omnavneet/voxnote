@@ -1,4 +1,7 @@
-import { CognitoIdentityProviderClient, InitiateAuthCommand, SignUpCommand, ConfirmSignUpCommand } from "@aws-sdk/client-cognito-identity-provider";
+import {
+  CognitoIdentityProviderClient, InitiateAuthCommand, SignUpCommand, ConfirmSignUpCommand, ChangePasswordCommand,
+  ForgotPasswordCommand, ConfirmForgotPasswordCommand
+} from "@aws-sdk/client-cognito-identity-provider";
 
 const cognitoClient = new CognitoIdentityProviderClient({
   region: process.env.AWS_REGION,
@@ -41,5 +44,36 @@ export const verifyCognitoUser = async (email, code) => {
     ConfirmationCode: code,
   });
 
+  return await cognitoClient.send(command);
+};
+
+/* CHANGE PASSWORD (logged in) */
+export const changeCognitoPassword = async (accessToken, oldPassword, newPassword) => {
+  const command = new ChangePasswordCommand({
+    AccessToken: accessToken,
+    PreviousPassword: oldPassword,
+    ProposedPassword: newPassword,
+  });
+
+  return await cognitoClient.send(command);
+};
+
+/* CHANGE PASSWORD (forgot password) */
+export const forgotCognitoPassword = async (email) => {
+  const command = new ForgotPasswordCommand({
+    ClientId: process.env.COGNITO_CLIENT_ID,
+    Username: email,
+  });
+  return await cognitoClient.send(command);
+};
+
+/* CONFIRM FORGOT PASSWORD */
+export const confirmForgotCognitoPassword = async (email, code, newPassword) => {
+  const command = new ConfirmForgotPasswordCommand({
+    ClientId: process.env.COGNITO_CLIENT_ID,
+    Username: email,
+    ConfirmationCode: code,
+    Password: newPassword,
+  });
   return await cognitoClient.send(command);
 };
