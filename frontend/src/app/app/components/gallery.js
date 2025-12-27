@@ -205,7 +205,7 @@ export default function ImagesPage() {
 
                 <div className="absolute bottom-0 left-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                   <p className="text-xs text-white font-light truncate">
-                    {img.filename}
+                    {new Date(img.createdAt).toLocaleString()}
                   </p>
                 </div>
               </motion.div>
