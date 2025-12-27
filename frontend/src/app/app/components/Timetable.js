@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Clock, X, Check } from "lucide-react";
+import { X, Check } from "lucide-react";
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const START_HOUR = 8;
@@ -67,10 +67,7 @@ export default function Timetable() {
   return (
     <div className="max-w-7xl mx-auto px-6 py-3 h-screen">
       <div className="flex items-center gap-3 mb-3">
-        <div className="p-2 rounded-xl bg-orange-500/10 border border-orange-500/20">
-          <Clock size={18} className="text-orange-400" strokeWidth={1.5} />
-        </div>
-        <h2 className="text-lg font-light text-slate-200">
+        <h2 className="text-md font-light text-slate-200">
           Weekly Schedule
         </h2>
       </div>

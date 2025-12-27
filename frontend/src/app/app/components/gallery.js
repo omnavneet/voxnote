@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Upload, Trash2, X, Image } from "lucide-react";
+import { Upload, Trash2, X } from "lucide-react";
 
 export default function ImagesPage() {
   const [images, setImages] = useState([]);
