@@ -6,6 +6,7 @@ import HomeContent from "./components/homeContent";
 import Timetable from "./components/timetable";
 import Notes from "./components/notes";
 import Gallery from "./components/gallery";
+import Profile from "./components/profile";
 
 export default function DashboardPage() {
   const [tasks, setTasks] = useState([]);
@@ -37,6 +38,7 @@ export default function DashboardPage() {
     });
     window.location.href = "/sign-in";
   }
+
 
   useEffect(() => {
     fetchTasks();
@@ -92,9 +94,7 @@ export default function DashboardPage() {
         );
       case "profile":
         return (
-          <div className="text-white text-xs text-center py-20">
-            Profile View Coming Soon...
-          </div>
+          <Profile />
         );
       default:
         return (
