@@ -21,8 +21,8 @@ export default function LandingPage() {
       <nav className="relative z-50 px-4 md:px-12 py-6 flex justify-between items-center border-b border-white/10">
         <div className="text-xl font-light">VoxNote</div>
         <div className="flex gap-3 md:gap-4 items-center">
-          <a href="/sign-in" className="text-sm text-slate-400 hover:text-white transition-colors">Sign In</a>
-          <a href="/sign-up" className="px-4 md:px-6 py-2 bg-orange-500/10 border border-orange-500/30 hover:bg-orange-500/20 text-orange-400 text-sm font-light rounded-xl transition-all">
+          <a href="/sign-in" className="text-sm text-slate-400 hover:text-white transition-colors hover:cursor-pointer">Sign In</a>
+          <a href="/sign-up" className="px-4 md:px-6 py-2 bg-orange-500/10 border border-orange-500/30 hover:bg-orange-500/20 text-orange-400 text-sm font-light rounded-xl transition-all hover:cursor-pointer">
             Get Started
           </a>
         </div>
@@ -41,7 +41,7 @@ export default function LandingPage() {
           <p className="text-lg md:text-xl text-slate-400 mb-10 max-w-2xl mx-auto font-light">
             Notes, tasks, schedule, and AI insights in one place
           </p>
-          <a href="/sign-up" className="inline-block px-8 py-3 bg-orange-500/10 border border-orange-500/30 hover:bg-orange-500/20 text-orange-400 font-light rounded-xl transition-all">
+          <a href="/sign-up" className="inline-block px-8 py-3 bg-orange-500/10 border border-orange-500/30 hover:bg-orange-500/20 text-orange-400 font-light rounded-xl transition-all hover:cursor-pointer">
             Start Free
           </a>
         </motion.div>
