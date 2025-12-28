@@ -11,7 +11,7 @@ export default function HomeContent({ tasks, setTasks, seconds, timerRunning, se
 
   async function addTask() {
     if (!text.trim()) return;
-    const res = await fetch("http://localhost:5000/tasks", {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tasks`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
@@ -23,7 +23,7 @@ export default function HomeContent({ tasks, setTasks, seconds, timerRunning, se
   }
 
   async function deleteTask(taskId) {
-    await fetch(`http://localhost:5000/tasks/${taskId}`, {
+    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tasks/${taskId}`, {
       method: "DELETE",
       credentials: "include",
     });
@@ -31,21 +31,21 @@ export default function HomeContent({ tasks, setTasks, seconds, timerRunning, se
   }
 
   async function startFocus() {
-    await fetch("http://localhost:5000/timer/start", {
+    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/timer/start`, {
       method: "POST",
       credentials: "include",
     });
   }
 
   async function stopFocus() {
-    await fetch("http://localhost:5000/timer/stop", {
+    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/timer/stop`, {
       method: "POST",
       credentials: "include",
     });
   }
 
   async function fetchNotes() {
-    const res = await fetch("http://localhost:5000/notes", {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/notes`, {
       method: "GET",
       credentials: "include",
     });
@@ -55,7 +55,7 @@ export default function HomeContent({ tasks, setTasks, seconds, timerRunning, se
   }
 
   async function summarizeNotes(text) {
-    const res = await fetch(`http://localhost:5000/notes/summarizeAll`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/notes/summarizeAll`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",

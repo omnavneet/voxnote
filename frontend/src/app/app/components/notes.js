@@ -18,7 +18,7 @@ export default function NotesPage() {
     const [answer, setAnswer] = useState("");
 
     useEffect(() => {
-        fetch("http://localhost:5000/notes", { credentials: "include" })
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/notes`, { credentials: "include" })
             .then((r) => r.json())
             .then(setNotes)
             .catch(console.error);
@@ -26,7 +26,7 @@ export default function NotesPage() {
 
     function askQuestion() {
         if (!question.trim()) return;
-        fetch("http://localhost:5000/rag/query", {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/rag/query`, {
             method: "POST",
             credentials: "include",
             headers: { "Content-Type": "application/json" },
@@ -38,7 +38,7 @@ export default function NotesPage() {
     }
 
     function openNote(id) {
-        fetch(`http://localhost:5000/notes/${id}`, { credentials: "include" })
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/notes/${id}`, { credentials: "include" })
             .then((r) => r.json())
             .then(setSelected)
             .catch(console.error);
@@ -53,7 +53,7 @@ export default function NotesPage() {
         if (summary) form.append("summary", summary);
         if (file) form.append("file", file);
 
-        fetch("http://localhost:5000/notes", {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/notes`, {
             method: "POST",
             credentials: "include",
             body: form,
@@ -72,7 +72,7 @@ export default function NotesPage() {
 
     function summarize() {
         if (!content.trim()) return;
-        fetch("http://localhost:5000/notes/summarize", {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/notes/summarize`, {
             method: "POST",
             credentials: "include",
             headers: { "Content-Type": "application/json" },
@@ -84,7 +84,7 @@ export default function NotesPage() {
     }
 
     function deleteNote(id) {
-        fetch(`http://localhost:5000/notes/${id}`, {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/notes/${id}`, {
             method: "DELETE",
             credentials: "include",
         })
@@ -309,8 +309,8 @@ export default function NotesPage() {
                                 <div
                                     key={note.noteId}
                                     className={`flex items-start gap-3 px-3 md:px-4 py-2 md:py-3 rounded-xl transition-all group cursor-pointer ${selected?.noteId === note.noteId
-                                            ? "bg-orange-500/10 border border-orange-500/20"
-                                            : "hover:bg-white/5 border border-transparent"
+                                        ? "bg-orange-500/10 border border-orange-500/20"
+                                        : "hover:bg-white/5 border border-transparent"
                                         }`}
                                 >
                                     <button onClick={() => openNote(note.noteId)} className="flex items-start gap-2 md:gap-3 flex-1 text-left">

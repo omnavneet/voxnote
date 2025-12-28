@@ -12,7 +12,7 @@ export default function Timetable() {
   const [draftLabel, setDraftLabel] = useState("");
 
   async function fetchTimetable() {
-    const res = await fetch("http://localhost:5000/timetable", { credentials: "include" });
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/timetable`, { credentials: "include" });
     const data = await res.json();
     setSlots(data);
   }

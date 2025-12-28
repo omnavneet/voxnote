@@ -12,7 +12,7 @@ export default function ImagesPage() {
 
   async function fetchImages() {
     try {
-      const res = await fetch("http://localhost:5000/images", { credentials: "include" });
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/images`, { credentials: "include" });
       if (!res.ok) return setImages([]);
       const data = await res.json();
       setImages(data);
@@ -34,7 +34,7 @@ export default function ImagesPage() {
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:5000/images", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/images`, {
         method: "POST",
         credentials: "include",
         body: formData,
@@ -47,7 +47,7 @@ export default function ImagesPage() {
 
   async function handleDelete(imageId) {
     try {
-      const res = await fetch(`http://localhost:5000/images/${imageId}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/images/${imageId}`, {
         method: "DELETE",
         credentials: "include",
       });

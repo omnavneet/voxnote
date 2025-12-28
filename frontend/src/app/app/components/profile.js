@@ -11,7 +11,7 @@ export default function Profile() {
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
     useEffect(() => {
-        fetch("http://localhost:5000/auth/me", { credentials: "include" })
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/me`, { credentials: "include" })
             .then((res) => res.json())
             .then(setUser)
             .catch(console.error);
@@ -19,7 +19,7 @@ export default function Profile() {
 
     const changePassword = async () => {
         setStatus("Saving...");
-        const res = await fetch("http://localhost:5000/auth/change-password", {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/change-password`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             credentials: "include",
@@ -34,7 +34,7 @@ export default function Profile() {
     };
 
     const deleteAccount = async () => {
-        const res = await fetch("http://localhost:5000/auth/delete-user", {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/delete-user`, {
             method: "DELETE",
             credentials: "include",
         });
@@ -127,7 +127,7 @@ export default function Profile() {
                             Delete Account
                         </motion.button>
                     )}
-                    
+
                     {status && (
                         <p className="text-sm text-slate-400 font-light text-center">{status}</p>
                     )}

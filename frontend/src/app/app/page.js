@@ -16,7 +16,7 @@ export default function DashboardPage() {
   const [todayFocusedSec, setTodayFocusedSec] = useState(0);
 
   async function fetchTasks() {
-    const res = await fetch("http://localhost:5000/tasks", {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tasks`, {
       method: "GET",
       credentials: "include",
     });
@@ -24,7 +24,7 @@ export default function DashboardPage() {
   }
 
   async function fetchTodayFocused() {
-    const res = await fetch("http://localhost:5000/timer/today", {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/timer/today`, {
       credentials: "include",
     });
     const data = await res.json();
@@ -32,7 +32,7 @@ export default function DashboardPage() {
   }
 
   async function handleLogout() {
-    await fetch("http://localhost:5000/auth/logout", {
+    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/logout`, {
       method: "POST",
       credentials: "include",
     });
@@ -164,8 +164,8 @@ export default function DashboardPage() {
               key={id}
               onClick={() => setActiveNav(id)}
               className={`relative p-2.5 md:p-3 rounded-full transition-colors ${activeNav === id
-                  ? "text-orange-400"
-                  : "text-slate-400 hover:text-slate-200"
+                ? "text-orange-400"
+                : "text-slate-400 hover:text-slate-200"
                 }`}
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}

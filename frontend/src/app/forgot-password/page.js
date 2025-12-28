@@ -11,7 +11,7 @@ export default function ForgotPassword() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
-        await fetch("http://localhost:5000/auth/forgot-password", {
+        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/forgot-password`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email }),

@@ -20,6 +20,8 @@ app.use(
   })
 );
 
+app.options("*", cors());
+
 app.use(cookieParser());
 
 app.use("/tasks", tasksRoutes);
