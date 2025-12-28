@@ -1,6 +1,6 @@
 import {
   CognitoIdentityProviderClient, InitiateAuthCommand, SignUpCommand, ConfirmSignUpCommand, ChangePasswordCommand,
-  ForgotPasswordCommand, ConfirmForgotPasswordCommand
+  ForgotPasswordCommand, ConfirmForgotPasswordCommand, DeleteUserCommand
 } from "@aws-sdk/client-cognito-identity-provider";
 
 const cognitoClient = new CognitoIdentityProviderClient({
@@ -46,6 +46,14 @@ export const verifyCognitoUser = async (email, code) => {
 
   return await cognitoClient.send(command);
 };
+
+/* DELETE USER */
+export const deleteCognitoUser = async (accessToken) => {
+  const command = new DeleteUserCommand({
+    AccessToken: accessToken,
+  });
+  return await cognitoClient.send(command);
+}
 
 /* CHANGE PASSWORD (logged in) */
 export const changeCognitoPassword = async (accessToken, oldPassword, newPassword) => {

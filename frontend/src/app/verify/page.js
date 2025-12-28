@@ -1,59 +1,70 @@
 "use client";
 import { useState } from "react";
-import { useRouter, useSearchParams } from 'next/navigation';
+import { motion } from "framer-motion";
+import { useRouter, useSearchParams } from "next/navigation";
 
-export default function Verify() {
+export default function VerifyEmail() {
   const [code, setCode] = useState("");
-  const [loading, setLoading] = useState(false);
-  const searchParams = useSearchParams();
-  const email = searchParams.get('email') || "";
-  const [status, setStatus] = useState("");
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const email = searchParams.get("email");
 
-  async function handleVerify(e) {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    const res = await fetch("http://localhost:5000/auth/verify-email", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, code }),
+    });
 
-    try {
-      await fetch("http://localhost:5000/auth/verify-email", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, code }),
-      });
-      router.push("/sign-in");
-
-    } catch (err) {
-      alert(err.message);
-    } finally {
-      setLoading(false);
+    if (!res.ok) {
+      alert("Invalid verification code");
+      return;
     }
-  }
+    router.push("/sign-in");
+  };
 
   return (
-    <main className="min-h-screen flex items-center justify-center px-6">
-      <div className="w-full max-w-sm">
-        <h2 className="text-2xl font-semibold mb-6">
-          Verify your email
-        </h2>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center px-4">
+      <div className="fixed inset-0 bg-gradient-radial from-orange-500/5 via-transparent to-transparent pointer-events-none" />
 
-        <form onSubmit={handleVerify} className="flex flex-col gap-4">
-          <input
-            type="text"
-            placeholder="Verification code"
-            required
-            onChange={e => setCode(e.target.value)}
-            className="border px-4 py-2 rounded"
-          />
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="w-full max-w-md relative"
+      >
+        <a href="/sign-up" className="absolute -top-12 left-0 text-sm text-slate-400 hover:text-white transition-colors">
+          ← Back
+        </a>
 
-          <button
-            disabled={loading}
-            className="bg-black text-white py-2 rounded"
-          >
-            {loading ? "Verifying..." : "Verify"}
-          </button>
-          {status && <p className="mt-4 text-green-600">{status}</p>}
-        </form>
-      </div>
-    </main>
+        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8">
+          <h1 className="text-2xl font-light text-white mb-2">Verify email</h1>
+          <p className="text-sm text-slate-400 mb-8 font-light">Enter the code sent to {email}</p>
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm text-slate-400 mb-2 font-light">Verification Code</label>
+              <input
+                type="text"
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
+                placeholder="Enter code"
+                onKeyPress={(e) => e.key === 'Enter' && handleSubmit(e)}
+                className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-xl text-white placeholder:text-slate-500 focus:outline-none focus:border-orange-500/50 transition-all font-light"
+              />
+            </div>
+
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={handleSubmit}
+              className="w-full py-3 bg-orange-500/10 border border-orange-500/30 hover:bg-orange-500/20 text-orange-400 rounded-xl transition-all font-light"
+            >
+              Verify Email
+            </motion.button>
+          </div>
+        </div>
+      </motion.div>
+    </div>
   );
 }

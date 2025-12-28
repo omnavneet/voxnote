@@ -1,13 +1,14 @@
 "use client";
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
-import { User, Lock } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { User, Lock, Trash2 } from "lucide-react";
 
 export default function Profile() {
     const [user, setUser] = useState(null);
     const [oldPassword, setOldPassword] = useState("");
     const [newPassword, setNewPassword] = useState("");
     const [status, setStatus] = useState("");
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
     useEffect(() => {
         fetch("http://localhost:5000/auth/me", { credentials: "include" })
@@ -29,6 +30,17 @@ export default function Profile() {
         if (res.ok) {
             setOldPassword("");
             setNewPassword("");
+        }
+    };
+
+    const deleteAccount = async () => {
+        const res = await fetch("http://localhost:5000/auth/delete-user", {
+            method: "DELETE",
+            credentials: "include",
+        });
+
+        if (res.ok) {
+            window.location.href = "/sign-in";
         }
     };
 
@@ -83,6 +95,39 @@ export default function Profile() {
                         Change Password
                     </motion.button>
 
+                    {showDeleteConfirm ? (
+                        <div className="space-y-3">
+                            <p className="text-sm text-red-400 font-light">Are you sure? This action cannot be undone.</p>
+                            <div className="flex gap-2">
+                                <motion.button
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    onClick={deleteAccount}
+                                    className="flex-1 px-5 py-3 text-sm border border-red-500/30 rounded-xl bg-red-500/10 hover:bg-red-500/20 transition-all text-red-400 font-light"
+                                >
+                                    Yes, Delete
+                                </motion.button>
+                                <motion.button
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    onClick={() => setShowDeleteConfirm(false)}
+                                    className="flex-1 px-5 py-3 text-sm border border-white/20 rounded-xl bg-white/5 hover:bg-white/10 transition-all text-slate-400 font-light"
+                                >
+                                    Cancel
+                                </motion.button>
+                            </div>
+                        </div>
+                    ) : (
+                        <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={() => setShowDeleteConfirm(true)}
+                            className="w-full px-5 py-3 text-sm border border-red-500/30 rounded-xl bg-red-500/10 hover:bg-red-500/20 transition-all text-red-400 font-light"
+                        >
+                            Delete Account
+                        </motion.button>
+                    )}
+                    
                     {status && (
                         <p className="text-sm text-slate-400 font-light text-center">{status}</p>
                     )}

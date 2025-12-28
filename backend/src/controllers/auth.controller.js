@@ -1,4 +1,4 @@
-import { signInWithCognito, signUpWithCognito, verifyCognitoUser, changeCognitoPassword, forgotCognitoPassword, confirmForgotCognitoPassword } from "../services/cognitoAuth.service.js";
+import { signInWithCognito, signUpWithCognito, verifyCognitoUser, changeCognitoPassword, forgotCognitoPassword, confirmForgotCognitoPassword, deleteCognitoUser } from "../services/cognitoAuth.service.js";
 
 export const login = async (req, res) => {
   try {
@@ -102,6 +102,20 @@ export const logout = async (req, res) => {
     message: "Logout successful",
   });
 }
+
+/* DELETE USER */
+export const deleteUser = async (req, res) => {
+  try {
+    const accessToken = req.cookies.accessToken;
+    await deleteCognitoUser(accessToken);
+    res.clearCookie("accessToken", { path: "/" });
+    res.clearCookie("idToken", { path: "/" });
+    res.clearCookie("refreshToken", { path: "/" });
+    return res.status(200).json({ message: "User deleted successfully" });
+  } catch (error) {
+    return res.status(400).json({ message: error.message });
+  }
+};
 
 /* CHANGE PASSWORD */
 export const changePassword = async (req, res) => {
