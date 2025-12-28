@@ -2,8 +2,8 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Home, Calendar, FileText, Bot, User, LogOut, Image } from "lucide-react";
-import HomeContent from "./components/homeContent";
-import Timetable from "./components/timetable";
+import HomeContent from "./components/HomeContent";
+import Timetable from "./components/Timetable";
 import Notes from "./components/notes";
 import Gallery from "./components/gallery";
 import Profile from "./components/profile";
