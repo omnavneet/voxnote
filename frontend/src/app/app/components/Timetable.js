@@ -12,9 +12,7 @@ export default function Timetable() {
   const [draftLabel, setDraftLabel] = useState("");
 
   async function fetchTimetable() {
-    const res = await fetch("http://localhost:5000/timetable", {
-      credentials: "include",
-    });
+    const res = await fetch("http://localhost:5000/timetable", { credentials: "include" });
     const data = await res.json();
     setSlots(data);
   }
@@ -35,7 +33,6 @@ export default function Timetable() {
 
   async function saveSlot() {
     const { day, hour } = activeSlot;
-
     const payload = {
       day,
       startHour: hour,
@@ -52,11 +49,8 @@ export default function Timetable() {
     });
 
     const updated = await res.json();
-
     setSlots((prev) => {
-      const filtered = prev.filter(
-        (s) => !(s.day === day && s.startHour === hour)
-      );
+      const filtered = prev.filter((s) => !(s.day === day && s.startHour === hour));
       return [...filtered, updated];
     });
 
@@ -65,24 +59,22 @@ export default function Timetable() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-3 h-screen">
-      <div className="flex items-center gap-3 mb-3">
-        <h2 className="text-md font-light text-slate-200">
-          Weekly Schedule
-        </h2>
-      </div>
+    <div className="max-w-7xl mx-auto h-[calc(100vh-200px)] md:h-[calc(100vh-180px)] flex flex-col">
+      <h2 className="text-sm md:text-md font-light text-slate-200 mb-3 md:mb-4">
+        Weekly Schedule
+      </h2>
 
-      <div className="overflow-x-auto rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-2xl">
+      <div className="flex-1 overflow-auto rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-2xl">
         <table className="w-full border-collapse text-sm text-white">
-          <thead>
+          <thead className="sticky top-0 bg-slate-800/90 backdrop-blur-sm z-10">
             <tr className="bg-white/5">
-              <th className="border border-white/10 px-4 py-2 text-left font-light text-slate-400 text-xs tracking-wider">
+              <th className="border border-white/10 px-2 md:px-4 py-2 text-left font-light text-slate-400 text-[10px] md:text-xs tracking-wider">
                 Time
               </th>
               {DAYS.map((day) => (
                 <th
                   key={day}
-                  className="border border-white/10 px-4 py-2 text-center font-light text-slate-400 text-xs tracking-wider"
+                  className="border border-white/10 px-2 md:px-4 py-2 text-center font-light text-slate-400 text-[10px] md:text-xs tracking-wider"
                 >
                   {day}
                 </th>
@@ -91,29 +83,22 @@ export default function Timetable() {
           </thead>
 
           <tbody>
-            {Array.from(
-              { length: END_HOUR - START_HOUR },
-              (_, i) => START_HOUR + i
-            ).map((hour) => (
+            {Array.from({ length: END_HOUR - START_HOUR }, (_, i) => START_HOUR + i).map((hour) => (
               <tr key={hour} className="hover:bg-white/5 transition-colors">
-                <td className="border border-white/10 px-4 py-3 text-xs text-slate-500 font-light">
+                <td className="border border-white/10 px-2 md:px-4 py-2 md:py-3 text-[10px] md:text-xs text-slate-500 font-light">
                   {hour}:00
                 </td>
 
                 {DAYS.map((day) => {
                   const slot = getSlot(day, hour);
-
                   return (
                     <td
                       key={day}
                       onClick={() => openEditor(day, hour)}
-                      className={`border border-white/10 px-4 py-3 cursor-pointer transition-all ${
-                        slot?.label
-                          ? "bg-orange-500/10 hover:bg-orange-500/20"
-                          : "hover:bg-white/10"
-                      }`}
+                      className={`border border-white/10 px-2 md:px-4 py-2 md:py-3 cursor-pointer transition-all ${slot?.label ? "bg-orange-500/10 hover:bg-orange-500/20" : "hover:bg-white/10"
+                        }`}
                     >
-                      <span className="text-sm text-slate-300 font-light">
+                      <span className="text-[11px] md:text-sm text-slate-300 font-light">
                         {slot?.label || ""}
                       </span>
                     </td>
@@ -131,29 +116,26 @@ export default function Timetable() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
             onClick={() => setActiveSlot(null)}
           >
             <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
+              initial={{ scale: 0.95 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.95 }}
               onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-md rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 p-6 shadow-2xl"
+              className="w-full max-w-md rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 p-4 md:p-6 shadow-2xl"
             >
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center justify-between mb-4 md:mb-6">
                 <div>
-                  <h3 className="text-slate-200 font-light text-lg mb-1">
+                  <h3 className="text-slate-200 font-light text-base md:text-lg mb-1">
                     Edit Time Slot
                   </h3>
-                  <p className="text-xs text-slate-500 font-light">
+                  <p className="text-[10px] md:text-xs text-slate-500 font-light">
                     {activeSlot.day} • {activeSlot.hour}:00 - {activeSlot.hour + 1}:00
                   </p>
                 </div>
-                <button
-                  onClick={() => setActiveSlot(null)}
-                  className="p-2 rounded-lg hover:bg-white/10 transition-colors"
-                >
+                <button onClick={() => setActiveSlot(null)} className="p-2 rounded-lg hover:bg-white/10 transition-colors">
                   <X size={16} className="text-slate-400" strokeWidth={1.5} />
                 </button>
               </div>
@@ -167,7 +149,7 @@ export default function Timetable() {
                 className="w-full rounded-xl bg-white/5 border border-white/20 px-4 py-3 text-slate-200 font-light text-sm placeholder:text-slate-500 outline-none focus:border-orange-500/50 transition-all"
               />
 
-              <div className="flex justify-end gap-3 mt-6">
+              <div className="flex justify-end gap-3 mt-4 md:mt-6">
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}

@@ -18,7 +18,6 @@ export default function Profile() {
 
     const changePassword = async () => {
         setStatus("Saving...");
-
         const res = await fetch("http://localhost:5000/auth/change-password", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -36,26 +35,23 @@ export default function Profile() {
     if (!user) return null;
 
     return (
-        <div className="h-screen flex justify-center px-6 py-8">
-            <div className="w-full max-w-md space-y-6">
-                {/* Header */}
+        <div className="h-[calc(100vh-200px)] md:h-screen flex justify-center px-4 md:px-6 py-4 md:py-8">
+            <div className="w-full max-w-md space-y-4 md:space-y-6">
                 <div className="flex items-center gap-3">
                     <div className="p-2 rounded-xl bg-orange-500/10 border border-orange-500/20">
                         <User size={18} className="text-orange-400" strokeWidth={1.5} />
                     </div>
-                    <h1 className="text-xl font-light text-slate-200">Account Settings</h1>
+                    <h1 className="text-lg md:text-xl font-light text-slate-200">Account Settings</h1>
                 </div>
 
-                {/* Email */}
-                <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
+                <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 md:p-6">
                     <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-2 font-light">
                         Email Address
                     </p>
                     <p className="text-sm text-slate-200 font-light">{user.user.email}</p>
                 </div>
 
-                {/* Change Password */}
-                <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 space-y-4">
+                <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 md:p-6 space-y-4">
                     <div className="flex items-center gap-2">
                         <Lock size={16} className="text-slate-400" strokeWidth={1.5} />
                         <h2 className="text-sm font-light text-slate-200">Change Password</h2>
