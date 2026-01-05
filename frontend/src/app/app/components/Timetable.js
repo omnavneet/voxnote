@@ -10,6 +10,8 @@ export default function Timetable() {
   const [slots, setSlots] = useState([]);
   const [activeSlot, setActiveSlot] = useState(null);
   const [draftLabel, setDraftLabel] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
 
   async function fetchTimetable() {
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/timetable`, { credentials: "include" });
@@ -29,9 +31,15 @@ export default function Timetable() {
     const slot = getSlot(day, hour);
     setActiveSlot({ day, hour });
     setDraftLabel(slot?.label || "");
+    setError("");
   }
 
   async function saveSlot() {
+    if (!activeSlot) return;
+
+    setSaving(true);
+    setError("");
+
     const { day, hour } = activeSlot;
     const payload = {
       day,
@@ -41,21 +49,34 @@ export default function Timetable() {
       category: "study",
     };
 
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/timetable`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify(payload),
-    });
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/timetable`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(payload),
+      });
 
-    const updated = await res.json();
-    setSlots((prev) => {
-      const filtered = prev.filter((s) => !(s.day === day && s.startHour === hour));
-      return [...filtered, updated];
-    });
+      const updated = await res.json();
 
-    setActiveSlot(null);
-    setDraftLabel("");
+      if (!res.ok) {
+        setError(updated.error || "Failed to save slot");
+        setSaving(false);
+        return;
+      }
+
+      setSlots((prev) => {
+        const filtered = prev.filter((s) => !(s.day === day && s.startHour === hour));
+        return [...filtered, updated];
+      });
+
+      setActiveSlot(null);
+      setDraftLabel("");
+    } catch (err) {
+      setError("Failed to save slot");
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -117,7 +138,7 @@ export default function Timetable() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
-            onClick={() => setActiveSlot(null)}
+            onClick={() => !saving && setActiveSlot(null)}
           >
             <motion.div
               initial={{ scale: 0.95 }}
@@ -135,16 +156,22 @@ export default function Timetable() {
                     {activeSlot.day} • {activeSlot.hour}:00 - {activeSlot.hour + 1}:00
                   </p>
                 </div>
-                <button onClick={() => setActiveSlot(null)} className="p-2 rounded-lg hover:bg-white/10 transition-colors">
+                <button onClick={() => !saving && setActiveSlot(null)} className="p-2 rounded-lg hover:bg-white/10 transition-colors">
                   <X size={16} className="text-slate-400" strokeWidth={1.5} />
                 </button>
               </div>
+
+              {error && (
+                <div className="mb-3 p-2 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-xs">
+                  {error}
+                </div>
+              )}
 
               <input
                 autoFocus
                 value={draftLabel}
                 onChange={(e) => setDraftLabel(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && saveSlot()}
+                onKeyPress={(e) => e.key === "Enter" && !saving && saveSlot()}
                 placeholder="What are you doing?"
                 className="w-full rounded-xl bg-white/5 border border-white/20 px-4 py-3 text-slate-200 font-light text-sm placeholder:text-slate-500 outline-none focus:border-orange-500/50 transition-all"
               />
@@ -153,7 +180,7 @@ export default function Timetable() {
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  onClick={() => setActiveSlot(null)}
+                  onClick={() => !saving && setActiveSlot(null)}
                   className="px-4 py-2 text-sm text-slate-400 hover:text-slate-200 font-light transition-colors"
                 >
                   Cancel
@@ -163,10 +190,11 @@ export default function Timetable() {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={saveSlot}
-                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/30 text-orange-400 text-sm font-light transition-all"
+                  disabled={saving}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/30 text-orange-400 text-sm font-light transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Check size={14} strokeWidth={1.5} />
-                  Save
+                  {saving ? "Saving..." : "Save"}
                 </motion.button>
               </div>
             </motion.div>

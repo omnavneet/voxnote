@@ -18,6 +18,8 @@ const graph = new StateGraph({
 /* ---------- NODE ---------- */
 const summarize = async (state) => {
     const result = await llm.invoke(`
+
+    [If the text given is empty or only contains whitespace, respond with "Create a Note first".]
 You are an emotional well-being assistant.
 
 Analyze the following journal note and infer:

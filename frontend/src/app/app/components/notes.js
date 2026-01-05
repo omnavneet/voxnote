@@ -17,35 +17,62 @@ export default function NotesPage() {
     const [question, setQuestion] = useState("");
     const [answer, setAnswer] = useState("");
 
+    const [asking, setAsking] = useState(false);
+    const [opening, setOpening] = useState(false);
+    const [creating, setCreating] = useState(false);
+    const [summarizing, setSummarizing] = useState(false);
+    const [deletingId, setDeletingId] = useState(null);
+    const [error, setError] = useState("");
+
     useEffect(() => {
         fetch(`${process.env.NEXT_PUBLIC_API_URL}/notes`, { credentials: "include" })
             .then((r) => r.json())
             .then(setNotes)
-            .catch(console.error);
+            .catch(() => setError("Failed to load notes"));
     }, []);
 
-    function askQuestion() {
-        if (!question.trim()) return;
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/rag/query`, {
-            method: "POST",
-            credentials: "include",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ question }),
-        })
-            .then((r) => r.json())
-            .then((d) => setAnswer(d.answer))
-            .catch(console.error);
+    async function askQuestion() {
+        if (!question.trim() || asking) return;
+        setAsking(true);
+        setError("");
+        try {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/rag/query`, {
+                method: "POST",
+                credentials: "include",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ question }),
+            });
+            const d = await res.json();
+            if (!res.ok) throw new Error(d.error || "Failed to get answer");
+            setAnswer(d.answer);
+        } catch {
+            setError("Failed to get answer");
+        } finally {
+            setAsking(false);
+        }
     }
 
-    function openNote(id) {
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/notes/${id}`, { credentials: "include" })
-            .then((r) => r.json())
-            .then(setSelected)
-            .catch(console.error);
+    async function openNote(id) {
+        if (opening) return;
+        setOpening(true);
+        setError("");
+        try {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/notes/${id}`, { credentials: "include" });
+            const d = await res.json();
+            if (!res.ok) throw new Error();
+            setSelected(d);
+        } catch {
+            setError("Failed to load note");
+        } finally {
+            setOpening(false);
+        }
     }
 
-    function createNote() {
-        if (!title.trim()) return;
+    async function createNote() {
+        if (!title.trim() || creating) return;
+        setCreating(true);
+        setError("");
+
         const form = new FormData();
         form.append("title", title);
         form.append("content", content);
@@ -53,47 +80,66 @@ export default function NotesPage() {
         if (summary) form.append("summary", summary);
         if (file) form.append("file", file);
 
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/notes`, {
-            method: "POST",
-            credentials: "include",
-            body: form,
-        })
-            .then((r) => r.json())
-            .then((note) => {
-                setNotes((n) => [note, ...n]);
-                setTitle("");
-                setContent("");
-                setFile(null);
-                setSummary("");
-                setShowCreate(false);
-            })
-            .catch(console.error);
+        try {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/notes`, {
+                method: "POST",
+                credentials: "include",
+                body: form,
+            });
+            const note = await res.json();
+            if (!res.ok) throw new Error();
+            setNotes((n) => [note, ...n]);
+            setTitle("");
+            setContent("");
+            setFile(null);
+            setSummary("");
+            setShowCreate(false);
+        } catch {
+            setError("Failed to create note");
+        } finally {
+            setCreating(false);
+        }
     }
 
-    function summarize() {
-        if (!content.trim()) return;
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/notes/summarize`, {
-            method: "POST",
-            credentials: "include",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ content }),
-        })
-            .then((r) => r.json())
-            .then((d) => setSummary(d.summary))
-            .catch(console.error);
+    async function summarize() {
+        if (!content.trim() || summarizing) return;
+        setSummarizing(true);
+        setError("");
+        try {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/notes/summarize`, {
+                method: "POST",
+                credentials: "include",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ content }),
+            });
+            const d = await res.json();
+            if (!res.ok) throw new Error();
+            setSummary(d.summary);
+        } catch {
+            setError("Failed to summarize");
+        } finally {
+            setSummarizing(false);
+        }
     }
 
-    function deleteNote(id) {
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/notes/${id}`, {
-            method: "DELETE",
-            credentials: "include",
-        })
-            .then(() => {
-                setNotes((n) => n.filter((x) => x.noteId !== id));
-                if (selected?.noteId === id) setSelected(null);
-                setDeleteConfirm(null);
-            })
-            .catch(console.error);
+    async function deleteNote(id) {
+        if (deletingId) return;
+        setDeletingId(id);
+        setError("");
+        try {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/notes/${id}`, {
+                method: "DELETE",
+                credentials: "include",
+            });
+            if (!res.ok) throw new Error();
+            setNotes((n) => n.filter((x) => x.noteId !== id));
+            if (selected?.noteId === id) setSelected(null);
+            setDeleteConfirm(null);
+        } catch {
+            setError("Failed to delete note");
+        } finally {
+            setDeletingId(null);
+        }
     }
 
     function renderAttachment(note) {
@@ -104,10 +150,7 @@ export default function NotesPage() {
             return (
                 <div className="relative group">
                     <img src={url} className="max-w-full rounded-xl border border-white/10" alt="attachment" />
-                    <button
-                        onClick={() => setFullscreen({ url, mimetype })}
-                        className="absolute top-2 right-2 p-2 rounded-lg bg-black/50 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
+                    <button onClick={() => setFullscreen({ url, mimetype })} className="absolute top-2 right-2 p-2 rounded-lg bg-black/50 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity">
                         <Maximize2 size={14} className="text-white" strokeWidth={1.5} />
                     </button>
                 </div>
@@ -118,10 +161,7 @@ export default function NotesPage() {
             return (
                 <div className="relative group">
                     <embed src={url} type="application/pdf" className="w-full h-96 rounded-xl border border-white/10 bg-white/5" />
-                    <button
-                        onClick={() => setFullscreen({ url, mimetype })}
-                        className="absolute top-2 right-2 p-2 rounded-lg bg-black/50 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
+                    <button onClick={() => setFullscreen({ url, mimetype })} className="absolute top-2 right-2 p-2 rounded-lg bg-black/50 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity">
                         <Maximize2 size={14} className="text-white" strokeWidth={1.5} />
                     </button>
                 </div>
@@ -138,6 +178,12 @@ export default function NotesPage() {
 
     return (
         <div className="space-y-6 max-w-7xl mx-auto">
+            {error && (
+                <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs">
+                    {error}
+                </div>
+            )}
+
             <AnimatePresence>
                 {fullscreen && (
                     <motion.div
@@ -163,13 +209,12 @@ export default function NotesPage() {
                 )}
             </AnimatePresence>
 
-            {/* Header */}
             <div className="flex flex-col md:flex-row gap-3 items-stretch md:items-start">
                 <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => setShowCreate(!showCreate)}
-                    className="flex items-center justify-center gap-2 px-4 py-3 text-xs border border-white/20 rounded-xl hover:bg-white/5 transition-all text-slate-300 font-light"
+                    className="flex items-center justify-center gap-2 px-4 md:px-5 py-2.5 text-xs border border-orange-500/30 rounded-xl bg-orange-500/10 hover:bg-orange-500/20 transition-all text-orange-400 font-light"
                 >
                     <Plus size={14} strokeWidth={1.5} />
                     New Note
@@ -223,7 +268,6 @@ export default function NotesPage() {
                 </div>
             </div>
 
-            {/* Create Form */}
             <AnimatePresence>
                 {showCreate && (
                     <motion.div
@@ -293,7 +337,6 @@ export default function NotesPage() {
                 )}
             </AnimatePresence>
 
-            {/* Notes Grid */}
             <div className="grid grid-cols-1 md:grid-cols-[minmax(300px,380px)_1fr] gap-6 md:gap-8">
                 <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 md:p-8">
                     <h3 className="text-[10px] uppercase tracking-[0.15em] text-slate-400 mb-4 md:mb-6 font-light">

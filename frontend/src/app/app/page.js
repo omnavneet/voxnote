@@ -14,6 +14,7 @@ export default function DashboardPage() {
   const [timerRunning, setTimerRunning] = useState(false);
   const [seconds, setSeconds] = useState(0);
   const [todayFocusedSec, setTodayFocusedSec] = useState(0);
+  const [logoutLoading, setLogoutLoading] = useState(false);
 
   async function fetchTasks() {
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tasks`, {
@@ -32,6 +33,7 @@ export default function DashboardPage() {
   }
 
   async function handleLogout() {
+    setLogoutLoading(true);
     await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/logout`, {
       method: "POST",
       credentials: "include",
@@ -184,7 +186,7 @@ export default function DashboardPage() {
         </div>
       </motion.nav>
 
-      {/* Logout Button - hidden on mobile */}
+      {/* Logout Button */}
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
@@ -193,10 +195,11 @@ export default function DashboardPage() {
       >
         <motion.button
           onClick={handleLogout}
-          className="group relative p-3 rounded-full text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all"
+          disabled={logoutLoading}
+          className="group relative p-3 rounded-full text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           whileHover={{ scale: 1.08 }}
           whileTap={{ scale: 0.95 }}
-          title="Logout"
+          title={logoutLoading ? "Logging out..." : "Logout"}
         >
           <LogOut size={16} strokeWidth={1.6} />
         </motion.button>

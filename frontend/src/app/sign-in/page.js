@@ -6,20 +6,31 @@ import { useRouter } from "next/navigation";
 export default function SignIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const router = useRouter();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError("");
     try {
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({ email, password }),
       });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || "Error signing in");
+        setLoading(false);
+        return;
+      }
       router.push("/app");
-    } catch (error) {
-      alert("Error signing in");
+    } catch (err) {
+      setError("Error signing in");
+      setLoading(false);
     }
   };
 
@@ -39,6 +50,12 @@ export default function SignIn() {
         <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8">
           <h1 className="text-2xl font-light text-white mb-2">Welcome back</h1>
           <p className="text-sm text-slate-400 mb-8 font-light">Sign in to your account</p>
+
+          {error && (
+            <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
+              {error}
+            </div>
+          )}
 
           <div className="space-y-4">
             <div>
@@ -73,9 +90,10 @@ export default function SignIn() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={handleSubmit}
-              className="w-full py-3 bg-orange-500/10 border border-orange-500/30 hover:bg-orange-500/20 text-orange-400 rounded-xl transition-all font-light hover:cursor-pointer"
+              disabled={loading}
+              className="w-full py-3 bg-orange-500/10 border border-orange-500/30 hover:bg-orange-500/20 text-orange-400 rounded-xl transition-all font-light hover:cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Sign In
+              {loading ? "Signing In..." : "Sign In"}
             </motion.button>
           </div>
 

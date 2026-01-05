@@ -9,6 +9,8 @@ export default function ImagesPage() {
   const [loading, setLoading] = useState(false);
   const [fullscreenImage, setFullscreenImage] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
+  const [error, setError] = useState("");
 
   async function fetchImages() {
     try {
@@ -16,8 +18,9 @@ export default function ImagesPage() {
       if (!res.ok) return setImages([]);
       const data = await res.json();
       setImages(data);
-    } catch (error) {
+    } catch {
       setImages([]);
+      setError("Failed to load images");
     }
   }
 
@@ -27,11 +30,12 @@ export default function ImagesPage() {
 
   async function handleUpload(e) {
     const file = e.target.files[0];
-    if (!file) return;
+    if (!file || loading) return;
 
     const formData = new FormData();
     formData.append("image", file);
     setLoading(true);
+    setError("");
 
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/images`, {
@@ -39,24 +43,32 @@ export default function ImagesPage() {
         credentials: "include",
         body: formData,
       });
-      if (res.ok) fetchImages();
+      if (!res.ok) throw new Error();
+      await fetchImages();
+    } catch {
+      setError("Failed to upload image");
     } finally {
       setLoading(false);
     }
   }
 
   async function handleDelete(imageId) {
+    if (deletingId) return;
+    setDeletingId(imageId);
+    setError("");
+
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/images/${imageId}`, {
         method: "DELETE",
         credentials: "include",
       });
-      if (res.ok) {
-        fetchImages();
-        setDeleteConfirm(null);
-      }
-    } catch (error) {
-      console.error(error);
+      if (!res.ok) throw new Error();
+      await fetchImages();
+      setDeleteConfirm(null);
+    } catch {
+      setError("Failed to delete image");
+    } finally {
+      setDeletingId(null);
     }
   }
 
@@ -74,6 +86,12 @@ export default function ImagesPage() {
 
   return (
     <div className="flex flex-col max-w-7xl mx-auto h-[calc(100vh-200px)] md:h-[calc(100vh-180px)]">
+      {error && (
+        <div className="mb-3 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs">
+          {error}
+        </div>
+      )}
+
       <AnimatePresence>
         {fullscreenImage && (
           <motion.div
@@ -128,7 +146,7 @@ export default function ImagesPage() {
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-4 auto-rows-[150px] md:auto-rows-[200px] gap-3 md:gap-4 pb-6">
-            {images?.map((img, idx) => (
+            {images.map((img, idx) => (
               <motion.div
                 key={img.imageId}
                 initial={{ opacity: 0, scale: 0.9 }}
@@ -142,16 +160,16 @@ export default function ImagesPage() {
                   className="w-full h-full object-cover cursor-pointer"
                   onClick={() => setFullscreenImage(img.url)}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
                 <div className="absolute top-2 md:top-3 right-2 md:right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                   {deleteConfirm === img.imageId ? (
                     <div className="flex items-center gap-2 bg-black/80 backdrop-blur-sm rounded-lg p-1">
                       <button
                         onClick={() => handleDelete(img.imageId)}
-                        className="px-2 py-1 text-[10px] bg-red-500/20 border border-red-500/30 rounded text-red-400"
+                        disabled={deletingId === img.imageId}
+                        className="px-2 py-1 text-[10px] bg-red-500/20 border border-red-500/30 rounded text-red-400 disabled:opacity-50"
                       >
-                        Confirm
+                        {deletingId === img.imageId ? "..." : "Confirm"}
                       </button>
                       <button
                         onClick={() => setDeleteConfirm(null)}

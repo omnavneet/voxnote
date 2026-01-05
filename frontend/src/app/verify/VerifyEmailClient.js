@@ -6,21 +6,27 @@ import { useRouter, useSearchParams } from "next/navigation";
 
 export default function VerifyEmailClient() {
     const [code, setCode] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
     const router = useRouter();
     const searchParams = useSearchParams();
     const email = searchParams.get("email");
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setLoading(true);
+        setError("");
 
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/verify-email`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email, code }),
         });
+        const data = await res.json();
 
         if (!res.ok) {
-            alert("Invalid verification code");
+            setError(data.error || "Invalid verification code");
+            setLoading(false);
             return;
         }
 
@@ -40,20 +46,28 @@ export default function VerifyEmailClient() {
                         Enter the code sent to {email}
                     </p>
 
+                    {error && (
+                        <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
+                            {error}
+                        </div>
+                    )}
+
                     <input
                         value={code}
                         onChange={(e) => setCode(e.target.value)}
                         placeholder="Verification code"
-                        className="w-full px-4 py-3 rounded-xl bg-white/5 text-white"
+                        onKeyPress={(e) => e.key === 'Enter' && handleSubmit(e)}
+                        className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/20 text-white placeholder:text-slate-500 focus:outline-none focus:border-orange-500/50 transition-all font-light"
                     />
 
                     <motion.button
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         onClick={handleSubmit}
-                        className="w-full mt-4 py-3 bg-orange-500/10 border border-orange-500/30 text-orange-400 rounded-xl"
+                        disabled={loading}
+                        className="w-full mt-4 py-3 bg-orange-500/10 border border-orange-500/30 text-orange-400 rounded-xl hover:bg-orange-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        Verify Email
+                        {loading ? "Verifying..." : "Verify Email"}
                     </motion.button>
                 </div>
             </motion.div>

@@ -7,23 +7,34 @@ export default function SignUp() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const router = useRouter();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (password !== confirmPassword) {
-      alert("Passwords don't match");
+      setError("Passwords don't match");
       return;
     }
+    setLoading(true);
+    setError("");
     try {
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/signup`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || "Error signing up");
+        setLoading(false);
+        return;
+      }
       router.push(`/verify?email=${encodeURIComponent(email)}`);
-    } catch (error) {
-      alert("Error signing up");
+    } catch (err) {
+      setError("Error signing up");
+      setLoading(false);
     }
   };
 
@@ -43,6 +54,12 @@ export default function SignUp() {
         <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8">
           <h1 className="text-2xl font-light text-white mb-2">Create account</h1>
           <p className="text-sm text-slate-400 mb-8 font-light">Get started with VoxNote</p>
+
+          {error && (
+            <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
+              {error}
+            </div>
+          )}
 
           <div className="space-y-4">
             <div>
@@ -83,9 +100,10 @@ export default function SignUp() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={handleSubmit}
-              className="w-full py-3 bg-orange-500/10 border border-orange-500/30 hover:bg-orange-500/20 text-orange-400 rounded-xl transition-all font-light hover:cursor-pointer"
+              disabled={loading}
+              className="w-full py-3 bg-orange-500/10 border border-orange-500/30 hover:bg-orange-500/20 text-orange-400 rounded-xl transition-all font-light hover:cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Create Account
+              {loading ? "Creating Account..." : "Create Account"}
             </motion.button>
           </div>
 

@@ -7,6 +7,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 export default function ConfirmPasswordClient() {
     const [code, setCode] = useState("");
     const [newPassword, setNewPassword] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
     const router = useRouter();
     const searchParams = useSearchParams();
     const email = searchParams.get("email");
@@ -14,18 +16,29 @@ export default function ConfirmPasswordClient() {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/confirm-password`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, code, newPassword }),
-        });
+        setLoading(true);
+        setError("");
 
-        if (!res.ok) {
-            alert("Failed to reset password");
-            return;
+        try {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/confirm-password`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, code, newPassword }),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                setError(data.error || "Failed to reset password");
+                setLoading(false);
+                return;
+            }
+
+            router.push("/sign-in");
+        } catch (err) {
+            setError("Failed to reset password");
+            setLoading(false);
         }
-
-        router.push("/sign-in");
     };
 
     return (
@@ -40,6 +53,12 @@ export default function ConfirmPasswordClient() {
                     <p className="text-sm text-slate-400 mb-8 font-light">
                         Enter the code sent to {email}
                     </p>
+
+                    {error && (
+                        <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
+                            {error}
+                        </div>
+                    )}
 
                     <div className="space-y-4">
                         <input
@@ -61,9 +80,10 @@ export default function ConfirmPasswordClient() {
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
                             onClick={handleSubmit}
-                            className="w-full py-3 bg-orange-500/10 border border-orange-500/30 text-orange-400 rounded-xl"
+                            disabled={loading}
+                            className="w-full py-3 bg-orange-500/10 border border-orange-500/30 text-orange-400 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            Reset Password
+                            {loading ? "Resetting..." : "Reset Password"}
                         </motion.button>
                     </div>
                 </div>

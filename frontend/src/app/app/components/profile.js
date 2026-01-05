@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { User, Lock, Trash2 } from "lucide-react";
 
 export default function Profile() {
@@ -9,6 +9,8 @@ export default function Profile() {
     const [newPassword, setNewPassword] = useState("");
     const [status, setStatus] = useState("");
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [changing, setChanging] = useState(false);
+    const [deleting, setDeleting] = useState(false);
 
     useEffect(() => {
         fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/me`, { credentials: "include" })
@@ -18,29 +20,58 @@ export default function Profile() {
     }, []);
 
     const changePassword = async () => {
-        setStatus("Saving...");
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/change-password`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
-            body: JSON.stringify({ oldPassword, newPassword }),
-        });
+        if (changing) return;
 
-        setStatus(res.ok ? "Password updated" : "Failed to change password");
-        if (res.ok) {
+        setChanging(true);
+        setStatus("");
+
+        try {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/change-password`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+                body: JSON.stringify({ oldPassword, newPassword }),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                setStatus(data.error || "Failed to change password");
+                setChanging(false);
+                return;
+            }
+
+            setStatus("Password updated");
             setOldPassword("");
             setNewPassword("");
+        } catch (err) {
+            setStatus("Failed to change password");
+        } finally {
+            setChanging(false);
         }
     };
 
     const deleteAccount = async () => {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/delete-user`, {
-            method: "DELETE",
-            credentials: "include",
-        });
+        if (deleting) return;
 
-        if (res.ok) {
+        setDeleting(true);
+
+        try {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/delete-user`, {
+                method: "DELETE",
+                credentials: "include",
+            });
+
+            if (!res.ok) {
+                setStatus("Failed to delete account");
+                setDeleting(false);
+                return;
+            }
+
             window.location.href = "/sign-in";
+        } catch (err) {
+            setStatus("Failed to delete account");
+            setDeleting(false);
         }
     };
 
@@ -83,16 +114,17 @@ export default function Profile() {
                         className="w-full text-sm px-4 py-3 border border-white/20 rounded-xl focus:outline-none focus:border-orange-500/50 bg-white/5 placeholder:text-slate-500 text-slate-200 font-light"
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
-                        onKeyPress={(e) => e.key === 'Enter' && changePassword()}
+                        onKeyPress={(e) => e.key === "Enter" && !changing && changePassword()}
                     />
 
                     <motion.button
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         onClick={changePassword}
-                        className="w-full px-5 py-3 text-sm border border-orange-500/30 rounded-xl bg-orange-500/10 hover:bg-orange-500/20 transition-all text-orange-400 font-light"
+                        disabled={changing}
+                        className="w-full px-5 py-3 text-sm border border-orange-500/30 rounded-xl bg-orange-500/10 hover:bg-orange-500/20 transition-all text-orange-400 font-light disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        Change Password
+                        {changing ? "Saving..." : "Change Password"}
                     </motion.button>
 
                     {showDeleteConfirm ? (
@@ -103,14 +135,15 @@ export default function Profile() {
                                     whileHover={{ scale: 1.02 }}
                                     whileTap={{ scale: 0.98 }}
                                     onClick={deleteAccount}
-                                    className="flex-1 px-5 py-3 text-sm border border-red-500/30 rounded-xl bg-red-500/10 hover:bg-red-500/20 transition-all text-red-400 font-light"
+                                    disabled={deleting}
+                                    className="flex-1 px-5 py-3 text-sm border border-red-500/30 rounded-xl bg-red-500/10 hover:bg-red-500/20 transition-all text-red-400 font-light disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
-                                    Yes, Delete
+                                    {deleting ? "Deleting..." : "Yes, Delete"}
                                 </motion.button>
                                 <motion.button
                                     whileHover={{ scale: 1.02 }}
                                     whileTap={{ scale: 0.98 }}
-                                    onClick={() => setShowDeleteConfirm(false)}
+                                    onClick={() => !deleting && setShowDeleteConfirm(false)}
                                     className="flex-1 px-5 py-3 text-sm border border-white/20 rounded-xl bg-white/5 hover:bg-white/10 transition-all text-slate-400 font-light"
                                 >
                                     Cancel

@@ -9,25 +9,49 @@ export default function HomeContent({ tasks, setTasks, seconds, timerRunning, se
   const [notesSummary, setNotesSummary] = useState("");
   const [loadingSummary, setLoadingSummary] = useState(false);
 
+  const [addingTask, setAddingTask] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
+  const [togglingTimer, setTogglingTimer] = useState(false);
+  const [error, setError] = useState("");
+
   async function addTask() {
-    if (!text.trim()) return;
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tasks`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ text }),
-    });
-    const newTask = await res.json();
-    setTasks((t) => [newTask, ...t]);
-    setText("");
+    if (!text.trim() || addingTask) return;
+    setAddingTask(true);
+    setError("");
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tasks`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ text }),
+      });
+      const newTask = await res.json();
+      if (!res.ok) throw new Error();
+      setTasks((t) => [newTask, ...t]);
+      setText("");
+    } catch {
+      setError("Failed to add task");
+    } finally {
+      setAddingTask(false);
+    }
   }
 
   async function deleteTask(taskId) {
-    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tasks/${taskId}`, {
-      method: "DELETE",
-      credentials: "include",
-    });
-    setTasks((t) => t.filter((task) => task.taskId !== taskId));
+    if (deletingId) return;
+    setDeletingId(taskId);
+    setError("");
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tasks/${taskId}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error();
+      setTasks((t) => t.filter((task) => task.taskId !== taskId));
+    } catch {
+      setError("Failed to delete task");
+    } finally {
+      setDeletingId(null);
+    }
   }
 
   async function startFocus() {
@@ -50,7 +74,6 @@ export default function HomeContent({ tasks, setTasks, seconds, timerRunning, se
       credentials: "include",
     });
     const notes = await res.json();
-    setAllNotes(notes);
     return notes;
   }
 
@@ -66,9 +89,13 @@ export default function HomeContent({ tasks, setTasks, seconds, timerRunning, se
   }
 
   const handleSummarizeClick = async () => {
+    if (loadingSummary) return;
     try {
       setLoadingSummary(true);
+      setError("");
+
       const notes = allNotes.length === 0 ? await fetchNotes() : allNotes;
+      if (allNotes.length === 0) setAllNotes(notes);
 
       if (notes.length === 0) {
         setNotesSummary("No notes found to summarize.");
@@ -81,8 +108,8 @@ export default function HomeContent({ tasks, setTasks, seconds, timerRunning, se
 
       const summary = await summarizeNotes(text);
       setNotesSummary(summary);
-    } catch (error) {
-      console.error("Failed to summarize notes:", error);
+    } catch {
+      setError("Failed to generate summary");
       setNotesSummary("Failed to generate summary. Please try again.");
     } finally {
       setLoadingSummary(false);
@@ -97,6 +124,12 @@ export default function HomeContent({ tasks, setTasks, seconds, timerRunning, se
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
+      {error && (
+        <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs">
+          {error}
+        </div>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Focus Timer */}
         <motion.div
@@ -120,16 +153,23 @@ export default function HomeContent({ tasks, setTasks, seconds, timerRunning, se
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
+              disabled={togglingTimer}
               onClick={async () => {
-                if (!timerRunning) {
-                  await startFocus();
-                  setTimerRunning(true);
-                } else {
-                  await stopFocus();
-                  setTimerRunning(false);
+                if (togglingTimer) return;
+                setTogglingTimer(true);
+                try {
+                  if (!timerRunning) {
+                    await startFocus();
+                    setTimerRunning(true);
+                  } else {
+                    await stopFocus();
+                    setTimerRunning(false);
+                  }
+                } finally {
+                  setTogglingTimer(false);
                 }
               }}
-              className="flex-1 flex items-center justify-center gap-2 py-3 text-xs border border-white/20 rounded-xl hover:bg-white/5 transition-all text-slate-300 font-light"
+              className="flex-1 flex items-center justify-center gap-2 px-4 md:px-5 py-2.5 text-xs border border-orange-500/30 rounded-xl bg-orange-500/10 hover:bg-orange-500/20 transition-all text-orange-400 font-light"
             >
               {timerRunning ? (
                 <>
@@ -147,9 +187,7 @@ export default function HomeContent({ tasks, setTasks, seconds, timerRunning, se
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={async () => {
-                if (timerRunning) {
-                  await stopFocus();
-                }
+                if (timerRunning) await stopFocus();
                 setSeconds(0);
                 setTimerRunning(false);
               }}
@@ -182,9 +220,10 @@ export default function HomeContent({ tasks, setTasks, seconds, timerRunning, se
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={addTask}
-              className="px-5 py-2.5 text-xs border border-white/20 rounded-xl hover:bg-white/5 transition-all text-slate-300 font-light"
+              disabled={addingTask}
+              className="flex items-center justify-center gap-2 px-4 md:px-5 py-2.5 text-xs border border-orange-500/30 rounded-xl bg-orange-500/10 hover:bg-orange-500/20 transition-all text-orange-400 font-light"
             >
-              Add
+              {addingTask ? "Adding..." : "Add"}
             </motion.button>
           </div>
           <div className="space-y-3 max-h-80 overflow-y-auto">
@@ -198,14 +237,16 @@ export default function HomeContent({ tasks, setTasks, seconds, timerRunning, se
               >
                 <button
                   onClick={() => deleteTask(task.taskId)}
-                  className="w-4 h-4 mt-0.5 rounded border border-slate-600 hover:border-orange-500 hover:bg-orange-500/10 transition-all flex-shrink-0"
+                  disabled={deletingId === task.taskId}
+                  className="w-4 h-4 mt-0.5 rounded border border-slate-600 hover:border-orange-500 hover:bg-orange-500/10 transition-all flex-shrink-0 disabled:opacity-50"
                 />
                 <span className="text-xs text-slate-300 flex-1 leading-relaxed font-light">
                   {task.text}
                 </span>
                 <button
                   onClick={() => deleteTask(task.taskId)}
-                  className="opacity-0 group-hover:opacity-100 transition-opacity"
+                  disabled={deletingId === task.taskId}
+                  className="opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-50"
                 >
                   <X size={14} className="text-slate-500 hover:text-slate-300" strokeWidth={1.5} />
                 </button>
