@@ -85,3 +85,17 @@ export const confirmForgotCognitoPassword = async (email, code, newPassword) => 
   });
   return await cognitoClient.send(command);
 };
+
+/* REFRESH SESSION */
+export const refreshCognitoSession = async (refreshToken) => {
+  const command = new InitiateAuthCommand({
+    AuthFlow: "REFRESH_TOKEN_AUTH",
+    ClientId: process.env.COGNITO_CLIENT_ID,
+    AuthParameters: {
+      REFRESH_TOKEN: refreshToken,
+    },
+  });
+
+  const response = await cognitoClient.send(command);
+  return response.AuthenticationResult;
+};

@@ -93,6 +93,25 @@ export const me = async (req, res) => {
   });
 };
 
+export const refreshSession = async (req, res) => {
+  try {
+    const refreshToken = req.cookies.refreshToken;
+    if (!refreshToken) return res.status(401).json({ message: "No refresh token" });
+
+    const result = await refreshCognitoSession(refreshToken);
+
+    const { AccessToken, IdToken, ExpiresIn } = result;
+
+    res.cookie("accessToken", AccessToken, { httpOnly: true, secure: true, sameSite: "none", path: "/", maxAge: ExpiresIn * 1000 });
+    res.cookie("idToken", IdToken, { httpOnly: true, secure: true, sameSite: "none", path: "/", maxAge: ExpiresIn * 1000 });
+
+    return res.json({ message: "Refreshed" });
+  } catch {
+    return res.status(401).json({ message: "Refresh failed" });
+  }
+};
+
+
 export const logout = async (req, res) => {
   res.clearCookie("accessToken", { path: "/" });
   res.clearCookie("idToken", { path: "/" });

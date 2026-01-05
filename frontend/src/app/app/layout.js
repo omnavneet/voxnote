@@ -10,9 +10,13 @@ export default function AppLayout({ children }) {
   useEffect(() => {
     async function checkAuth() {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/me`, {
-          credentials: "include",
-        });
+        let res = await fetch("/auth/me", { credentials: "include" });
+
+        if (!res.ok) {
+          const r = await fetch("/auth/refresh", { method: "POST", credentials: "include" });
+          if (!r.ok) redirect("/sign-in");
+        }
+
 
         if (!res.ok) throw new Error();
         setLoading(false);
