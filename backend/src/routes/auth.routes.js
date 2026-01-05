@@ -8,7 +8,7 @@ router.post("/login", login);
 router.post("/signup", signup);
 router.post("/verify-email", verifyEmail);
 router.get("/me", requireAuth, me);
-router.get("/refresh", refreshSession);
+router.post("/refresh", refreshSession);
 router.post("/logout", requireAuth, logout);
 router.post("/change-password", requireAuth, changePassword);
 router.post("/forgot-password", forgotPassword);

@@ -17,7 +17,6 @@ export default function AppLayout({ children }) {
           if (!r.ok) redirect("/sign-in");
         }
 
-
         if (!res.ok) throw new Error();
         setLoading(false);
       } catch {
