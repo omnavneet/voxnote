@@ -41,7 +41,7 @@ export default function Timetable() {
       category: "study",
     };
 
-    const res = await fetch("http://localhost:5000/timetable", {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/timetable`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
