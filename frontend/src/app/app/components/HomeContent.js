@@ -123,36 +123,44 @@ export default function HomeContent({ tasks, setTasks, seconds, timerRunning, se
   };
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto">
+    <div className="space-y-4 md:space-y-5">
       {error && (
-        <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs">
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="p-4 rounded-2xl bg-red-50 border border-red-100 text-red-600 text-sm font-medium shadow-sm"
+        >
           {error}
-        </div>
+        </motion.div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Focus Timer */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-5">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-2xl"
+          className="bg-white/90 backdrop-blur-xl border border-gray-200/60 rounded-3xl p-6 md:p-8 shadow-lg shadow-indigo-100/50 hover:shadow-xl hover:shadow-indigo-200/50 transition-all duration-500"
         >
-          <h2 className="text-[10px] uppercase tracking-[0.15em] text-slate-400 mb-6 font-medium">
-            Focus Timer
-          </h2>
+          <div className="flex items-center gap-2.5 mb-6">
+            <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse shadow-lg shadow-indigo-300" />
+            <h2 className="text-sm font-semibold text-gray-600 tracking-wide">
+              Focus Session
+            </h2>
+          </div>
+
           <div className="text-center mb-8">
-            <div className="text-6xl font-extralight tabular-nums text-slate-100 tracking-tight mb-2">
+            <div className="text-6xl md:text-7xl font-bold tabular-nums bg-gradient-to-br from-indigo-600 to-purple-600 bg-clip-text text-transparent tracking-tight mb-3">
               {formatTime(seconds)}
             </div>
-            <p className="text-[10px] text-slate-500 uppercase tracking-wide">
-              minutes elapsed
+            <p className="text-xs text-gray-500 uppercase tracking-widest font-semibold">
+              Minutes Elapsed
             </p>
           </div>
+
           <div className="flex gap-3">
             <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+              whileHover={{ scale: 1.03, y: -2 }}
+              whileTap={{ scale: 0.97 }}
               disabled={togglingTimer}
               onClick={async () => {
                 if (togglingTimer) return;
@@ -169,117 +177,131 @@ export default function HomeContent({ tasks, setTasks, seconds, timerRunning, se
                   setTogglingTimer(false);
                 }
               }}
-              className="flex-1 flex items-center justify-center gap-2 px-4 md:px-5 py-2.5 text-xs border border-orange-500/30 rounded-xl bg-orange-500/10 hover:bg-orange-500/20 transition-all text-orange-400 font-light"
+              className="flex-1 flex items-center justify-center gap-2.5 px-5 py-3.5 md:py-4 text-sm bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl shadow-lg shadow-indigo-300/50 hover:shadow-xl hover:shadow-indigo-400/60 transition-all text-white font-bold disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {timerRunning ? (
                 <>
-                  <Pause size={14} strokeWidth={1.5} />
+                  <Pause size={18} strokeWidth={2.5} />
                   Pause
                 </>
               ) : (
                 <>
-                  <Play size={14} strokeWidth={1.5} />
-                  Start
+                  <Play size={18} strokeWidth={2.5} />
+                  Start Focus
                 </>
               )}
             </motion.button>
+
             <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+              whileHover={{ scale: 1.03, y: -2 }}
+              whileTap={{ scale: 0.97 }}
               onClick={async () => {
                 if (timerRunning) await stopFocus();
                 setSeconds(0);
                 setTimerRunning(false);
               }}
-              className="px-5 py-3 text-xs border border-white/20 rounded-xl hover:bg-white/5 transition-all text-slate-300 font-light"
+              className="px-5 md:px-6 py-3.5 md:py-4 text-sm bg-gray-100 hover:bg-gray-200 rounded-2xl transition-all text-gray-700 font-bold shadow-sm"
             >
               Reset
             </motion.button>
           </div>
         </motion.div>
 
-        {/* Today's Tasks */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-2xl"
+          className="bg-white/90 backdrop-blur-xl border border-gray-200/60 rounded-3xl p-6 md:p-8 shadow-lg shadow-emerald-100/50 hover:shadow-xl hover:shadow-emerald-200/50 transition-all duration-500"
         >
-          <h2 className="text-[10px] uppercase tracking-[0.15em] text-slate-400 mb-6 font-medium">
-            Today's Tasks
-          </h2>
-          <div className="flex gap-2 mb-6">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-2.5">
+              <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-lg shadow-emerald-300" />
+              <h2 className="text-sm font-semibold text-gray-600 tracking-wide">
+                Today's Tasks
+              </h2>
+            </div>
+          </div>
+
+          <div className="flex gap-2.5 mb-5">
             <input
-              className="flex-1 text-xs px-4 py-2.5 border border-white/20 rounded-xl focus:outline-none focus:border-orange-500/50 bg-white/5 placeholder:text-slate-500 text-slate-200 font-light backdrop-blur-sm"
+              className="flex-1 text-sm px-4 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent placeholder:text-gray-400 text-gray-800 font-medium transition-all"
               placeholder="Add a new task..."
               value={text}
               onChange={(e) => setText(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && addTask()}
             />
             <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+              whileHover={{ scale: 1.03, y: -2 }}
+              whileTap={{ scale: 0.97 }}
               onClick={addTask}
               disabled={addingTask}
-              className="flex items-center justify-center gap-2 px-4 md:px-5 py-2.5 text-xs border border-orange-500/30 rounded-xl bg-orange-500/10 hover:bg-orange-500/20 transition-all text-orange-400 font-light"
+              className="px-6 py-3.5 text-sm bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl shadow-lg shadow-emerald-300/50 hover:shadow-xl hover:shadow-emerald-400/60 transition-all text-white font-bold disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {addingTask ? "Adding..." : "Add"}
+              {addingTask ? "..." : "Add"}
             </motion.button>
           </div>
-          <div className="space-y-3 max-h-80 overflow-y-auto">
+
+          <div className="space-y-2.5 max-h-72 overflow-y-auto pr-2 custom-scrollbar">
             {tasks.slice(0, 5).map((task, idx) => (
               <motion.div
                 key={task.taskId}
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: idx * 0.05 }}
-                className="flex items-start gap-3 group"
+                className="flex items-start gap-3.5 p-3.5 rounded-2xl bg-gray-50 border border-gray-100 hover:bg-gray-100 hover:border-gray-200 transition-all group"
               >
                 <button
                   onClick={() => deleteTask(task.taskId)}
                   disabled={deletingId === task.taskId}
-                  className="w-4 h-4 mt-0.5 rounded border border-slate-600 hover:border-orange-500 hover:bg-orange-500/10 transition-all flex-shrink-0 disabled:opacity-50"
+                  className="w-5 h-5 mt-0.5 rounded-lg border-2 border-gray-300 hover:border-emerald-500 hover:bg-emerald-50 transition-all flex-shrink-0 disabled:opacity-50"
                 />
-                <span className="text-xs text-slate-300 flex-1 leading-relaxed font-light">
+                <span className="text-sm text-gray-800 flex-1 leading-relaxed font-medium">
                   {task.text}
                 </span>
                 <button
                   onClick={() => deleteTask(task.taskId)}
                   disabled={deletingId === task.taskId}
-                  className="opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-50"
+                  className="opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-50 p-1.5 hover:bg-gray-200 rounded-lg"
                 >
-                  <X size={14} className="text-slate-500 hover:text-slate-300" strokeWidth={1.5} />
+                  <X size={16} className="text-gray-500 hover:text-gray-700" strokeWidth={2.5} />
                 </button>
               </motion.div>
             ))}
             {tasks.length === 0 && (
-              <p className="text-[11px] text-slate-500 text-center py-8 font-light">
-                No tasks yet. Add one to get started.
-              </p>
+              <div className="text-center py-12">
+                <div className="w-14 h-14 rounded-3xl bg-gradient-to-br from-emerald-100 to-teal-100 border border-emerald-200 flex items-center justify-center mx-auto mb-4 shadow-sm">
+                  <Play size={22} className="text-emerald-600" strokeWidth={2.5} />
+                </div>
+                <p className="text-sm text-gray-500 font-medium">
+                  No tasks yet. Add one to get started!
+                </p>
+              </div>
             )}
           </div>
         </motion.div>
       </div>
 
-      {/* Notes Summary Section */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
-        className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-2xl"
+        className="bg-white/90 backdrop-blur-xl border border-gray-200/60 rounded-3xl p-6 md:p-8 shadow-lg shadow-purple-100/50 hover:shadow-xl hover:shadow-purple-200/50 transition-all duration-500"
       >
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-[10px] uppercase tracking-[0.15em] text-slate-400 font-medium">
-            Notes Summary
-          </h2>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div className="flex items-center gap-2.5">
+            <div className="w-2 h-2 rounded-full bg-purple-500 animate-pulse shadow-lg shadow-purple-300" />
+            <h2 className="text-sm font-semibold text-gray-600 tracking-wide">
+              AI Notes Summary
+            </h2>
+          </div>
           <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+            whileHover={{ scale: 1.03, y: -2 }}
+            whileTap={{ scale: 0.97 }}
             onClick={handleSummarizeClick}
             disabled={loadingSummary}
-            className="flex items-center gap-2 px-4 py-2.5 text-xs border border-purple-500/30 rounded-xl bg-purple-500/10 hover:bg-purple-500/20 transition-all text-purple-400 font-light disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center justify-center gap-2.5 px-5 py-3 text-sm bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl shadow-lg shadow-purple-300/50 hover:shadow-xl hover:shadow-purple-400/60 transition-all text-white font-bold disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
           >
-            <Sparkles size={14} strokeWidth={1.5} />
+            <Sparkles size={16} strokeWidth={2.5} className={loadingSummary ? "animate-spin" : ""} />
             {loadingSummary ? "Generating..." : "Generate Summary"}
           </motion.button>
         </div>
@@ -288,18 +310,40 @@ export default function HomeContent({ tasks, setTasks, seconds, timerRunning, se
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="p-6 bg-purple-500/10 backdrop-blur-xl border border-purple-500/20 rounded-xl text-slate-300 text-sm font-light leading-relaxed"
+            className="p-6 bg-gradient-to-br from-purple-50 to-pink-50 border border-purple-100 rounded-3xl text-gray-800 text-sm md:text-base font-medium leading-relaxed shadow-inner"
           >
             {notesSummary}
           </motion.div>
         )}
 
         {!notesSummary && !loadingSummary && (
-          <p className="text-[11px] text-slate-500 text-center py-8 font-light">
-            Click "Generate Summary" to get an AI-powered overview of all your notes.
-          </p>
+          <div className="text-center py-16">
+            <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-purple-100 to-pink-100 border border-purple-200 flex items-center justify-center mx-auto mb-5 shadow-sm">
+              <Sparkles size={28} className="text-purple-600" strokeWidth={2} />
+            </div>
+            <p className="text-sm text-gray-500 font-medium max-w-md mx-auto">
+              Click "Generate Summary" to get an AI-powered overview of all your notes.
+            </p>
+          </div>
         )}
       </motion.div>
+
+      <style jsx>{`
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: rgba(243, 244, 246, 0.5);
+          border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: rgba(156, 163, 175, 0.5);
+          border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: rgba(107, 114, 128, 0.7);
+        }
+      `}</style>
     </div>
   );
 }
