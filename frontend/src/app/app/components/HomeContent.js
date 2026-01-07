@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Play, Pause, X, Sparkles } from "lucide-react";
+import { Play, Pause, X, Sparkles, Clock, CheckCircle } from "lucide-react";
 
 export default function HomeContent({ tasks, setTasks, seconds, timerRunning, setTimerRunning, setSeconds }) {
   const [text, setText] = useState("");
@@ -123,44 +123,46 @@ export default function HomeContent({ tasks, setTasks, seconds, timerRunning, se
   };
 
   return (
-    <div className="space-y-4 md:space-y-5">
+    <div className="space-y-6 md:space-y-8 pb-8">
       {error && (
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="p-4 rounded-2xl bg-red-50 border border-red-100 text-red-600 text-sm font-medium shadow-sm"
+          className="p-4 rounded-xl bg-[#E8503A] border-2 border-[#2D2B28] text-white font-bold shadow-[4px_4px_0px_0px_#2D2B28]"
         >
           {error}
         </motion.div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-5">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-white/90 backdrop-blur-xl border border-gray-200/60 rounded-3xl p-6 md:p-8 shadow-lg shadow-indigo-100/50 hover:shadow-xl hover:shadow-indigo-200/50 transition-all duration-500"
+          className="bg-[#FFE8DC] border-2 border-[#2D2B28] rounded-3xl p-6 md:p-8 shadow-[6px_6px_0px_0px_#2D2B28] hover:translate-y-[-2px] transition-transform relative overflow-hidden"
         >
-          <div className="flex items-center gap-2.5 mb-6">
-            <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse shadow-lg shadow-indigo-300" />
-            <h2 className="text-sm font-semibold text-gray-600 tracking-wide">
+          <div className="absolute top-[-20px] right-[-20px] w-24 h-24 bg-[#E8503A]/10 rounded-full blur-xl pointer-events-none" />
+
+          <div className="flex items-center gap-3 mb-8">
+            <div className="bg-[#2D2B28] p-2 rounded-lg">
+              <Clock className="text-[#FFE8DC]" size={20} strokeWidth={2.5} />
+            </div>
+            <h2 className="text-sm font-black text-[#2D2B28] uppercase tracking-widest">
               Focus Session
             </h2>
           </div>
 
-          <div className="text-center mb-8">
-            <div className="text-6xl md:text-7xl font-bold tabular-nums bg-gradient-to-br from-indigo-600 to-purple-600 bg-clip-text text-transparent tracking-tight mb-3">
+          <div className="text-center mb-8 relative">
+            <div className="text-7xl md:text-8xl font-black text-[#2D2B28] tracking-tighter tabular-nums drop-shadow-sm">
               {formatTime(seconds)}
             </div>
-            <p className="text-xs text-gray-500 uppercase tracking-widest font-semibold">
-              Minutes Elapsed
-            </p>
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full border-4 border-[#2D2B28]/5 rounded-full blur-lg -z-10 transform scale-125" />
           </div>
 
-          <div className="flex gap-3">
+          <div className="flex gap-4">
             <motion.button
-              whileHover={{ scale: 1.03, y: -2 }}
-              whileTap={{ scale: 0.97 }}
+              whileHover={{ scale: 1.02, y: -2, boxShadow: "4px 4px 0px 0px #2D2B28" }}
+              whileTap={{ scale: 0.98, y: 0, boxShadow: "0px 0px 0px 0px #2D2B28" }}
               disabled={togglingTimer}
               onClick={async () => {
                 if (togglingTimer) return;
@@ -177,30 +179,33 @@ export default function HomeContent({ tasks, setTasks, seconds, timerRunning, se
                   setTogglingTimer(false);
                 }
               }}
-              className="flex-1 flex items-center justify-center gap-2.5 px-5 py-3.5 md:py-4 text-sm bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl shadow-lg shadow-indigo-300/50 hover:shadow-xl hover:shadow-indigo-400/60 transition-all text-white font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+              className={`flex-1 flex items-center justify-center gap-3 px-6 py-4 text-base border-2 border-[#2D2B28] rounded-xl shadow-[2px_2px_0px_0px_#2D2B28] transition-all font-black uppercase tracking-wide ${timerRunning
+                  ? "bg-[#FFC94D] text-[#2D2B28]"
+                  : "bg-[#E8503A] text-[#2D2B28]"
+                }`}
             >
               {timerRunning ? (
                 <>
-                  <Pause size={18} strokeWidth={2.5} />
+                  <Pause size={20} strokeWidth={3} />
                   Pause
                 </>
               ) : (
                 <>
-                  <Play size={18} strokeWidth={2.5} />
-                  Start Focus
+                  <Play size={20} strokeWidth={3} />
+                  Start
                 </>
               )}
             </motion.button>
 
             <motion.button
-              whileHover={{ scale: 1.03, y: -2 }}
-              whileTap={{ scale: 0.97 }}
+              whileHover={{ scale: 1.02, y: -2, boxShadow: "4px 4px 0px 0px #2D2B28" }}
+              whileTap={{ scale: 0.98, y: 0, boxShadow: "0px 0px 0px 0px #2D2B28" }}
               onClick={async () => {
                 if (timerRunning) await stopFocus();
                 setSeconds(0);
                 setTimerRunning(false);
               }}
-              className="px-5 md:px-6 py-3.5 md:py-4 text-sm bg-gray-100 hover:bg-gray-200 rounded-2xl transition-all text-gray-700 font-bold shadow-sm"
+              className="px-6 py-4 text-base bg-[#FAF5EE] border-2 border-[#2D2B28] rounded-xl shadow-[2px_2px_0px_0px_#2D2B28] transition-all text-[#2D2B28] font-bold"
             >
               Reset
             </motion.button>
@@ -211,69 +216,73 @@ export default function HomeContent({ tasks, setTasks, seconds, timerRunning, se
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="bg-white/90 backdrop-blur-xl border border-gray-200/60 rounded-3xl p-6 md:p-8 shadow-lg shadow-emerald-100/50 hover:shadow-xl hover:shadow-emerald-200/50 transition-all duration-500"
+          className="bg-[#FFF9E6] border-2 border-[#2D2B28] rounded-3xl p-6 md:p-8 shadow-[6px_6px_0px_0px_#2D2B28] flex flex-col h-full hover:translate-y-[-2px] transition-transform"
         >
           <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-2.5">
-              <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-lg shadow-emerald-300" />
-              <h2 className="text-sm font-semibold text-gray-600 tracking-wide">
+            <div className="flex items-center gap-3">
+              <div className="bg-[#2D2B28] p-2 rounded-lg">
+                <CheckCircle className="text-[#FFF9E6]" size={20} strokeWidth={2.5} />
+              </div>
+              <h2 className="text-sm font-black text-[#2D2B28] uppercase tracking-widest">
                 Today's Tasks
               </h2>
             </div>
+            <div className="px-3 py-1 bg-[#2D2B28] text-[#FFF9E6] text-xs font-bold rounded-full">
+              {tasks.length} REMAINING
+            </div>
           </div>
 
-          <div className="flex gap-2.5 mb-5">
+          <div className="flex gap-3 mb-6">
             <input
-              className="flex-1 text-sm px-4 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent placeholder:text-gray-400 text-gray-800 font-medium transition-all"
-              placeholder="Add a new task..."
+              className="flex-1 text-sm px-4 py-3 bg-[#FAF5EE] border-2 border-[#2D2B28] rounded-xl focus:outline-none focus:shadow-[2px_2px_0px_0px_#2D2B28] placeholder:text-[#2D2B28]/40 text-[#2D2B28] font-bold transition-all"
+              placeholder="What needs to be done?"
               value={text}
               onChange={(e) => setText(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && addTask()}
             />
             <motion.button
-              whileHover={{ scale: 1.03, y: -2 }}
-              whileTap={{ scale: 0.97 }}
+              whileHover={{ scale: 1.05, y: -2, boxShadow: "2px 2px 0px 0px #2D2B28" }}
+              whileTap={{ scale: 0.95, y: 0, boxShadow: "0px 0px 0px 0px #2D2B28" }}
               onClick={addTask}
               disabled={addingTask}
-              className="px-6 py-3.5 text-sm bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl shadow-lg shadow-emerald-300/50 hover:shadow-xl hover:shadow-emerald-400/60 transition-all text-white font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-5 py-3 text-sm bg-[#4ECDC4] border-2 border-[#2D2B28] rounded-xl shadow-[2px_2px_0px_0px_#2D2B28] transition-all text-[#FAF5EE] font-black uppercase disabled:opacity-50"
             >
               {addingTask ? "..." : "Add"}
             </motion.button>
           </div>
 
-          <div className="space-y-2.5 max-h-72 overflow-y-auto pr-2 custom-scrollbar">
-            {tasks.slice(0, 5).map((task, idx) => (
+          <div className="space-y-3 flex-1 overflow-y-auto pr-2 custom-scrollbar min-h-[200px] max-h-[300px]">
+            {tasks.map((task, idx) => (
               <motion.div
                 key={task.taskId}
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: idx * 0.05 }}
-                className="flex items-start gap-3.5 p-3.5 rounded-2xl bg-gray-50 border border-gray-100 hover:bg-gray-100 hover:border-gray-200 transition-all group"
+                className="flex items-start gap-3 p-3 rounded-xl bg-[#FAF5EE] border-2 border-[#2D2B28] hover:shadow-[2px_2px_0px_0px_#2D2B28] transition-all group"
               >
                 <button
                   onClick={() => deleteTask(task.taskId)}
                   disabled={deletingId === task.taskId}
-                  className="w-5 h-5 mt-0.5 rounded-lg border-2 border-gray-300 hover:border-emerald-500 hover:bg-emerald-50 transition-all flex-shrink-0 disabled:opacity-50"
-                />
-                <span className="text-sm text-gray-800 flex-1 leading-relaxed font-medium">
+                  className="w-6 h-6 mt-0.5 rounded-lg border-2 border-[#2D2B28] hover:bg-[#4ECDC4] transition-all flex-shrink-0 disabled:opacity-50 flex items-center justify-center group-hover/btn"
+                >
+                  <div className="w-0 h-0 group-hover:w-3 group-hover:h-3 bg-[#2D2B28] rounded-sm transition-all" />
+                </button>
+                <span className="text-sm text-[#2D2B28] flex-1 leading-relaxed font-bold pt-1">
                   {task.text}
                 </span>
                 <button
                   onClick={() => deleteTask(task.taskId)}
                   disabled={deletingId === task.taskId}
-                  className="opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-50 p-1.5 hover:bg-gray-200 rounded-lg"
+                  className="opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-50 p-1 hover:bg-[#E8503A] hover:text-white rounded-md border-2 border-transparent hover:border-[#2D2B28]"
                 >
-                  <X size={16} className="text-gray-500 hover:text-gray-700" strokeWidth={2.5} />
+                  <X size={16} strokeWidth={3} />
                 </button>
               </motion.div>
             ))}
             {tasks.length === 0 && (
-              <div className="text-center py-12">
-                <div className="w-14 h-14 rounded-3xl bg-gradient-to-br from-emerald-100 to-teal-100 border border-emerald-200 flex items-center justify-center mx-auto mb-4 shadow-sm">
-                  <Play size={22} className="text-emerald-600" strokeWidth={2.5} />
-                </div>
-                <p className="text-sm text-gray-500 font-medium">
-                  No tasks yet. Add one to get started!
+              <div className="text-center py-12 border-2 border-dashed border-[#2D2B28]/20 rounded-xl">
+                <p className="text-sm text-[#2D2B28]/50 font-bold uppercase tracking-wide">
+                  No tasks yet
                 </p>
               </div>
             )}
@@ -285,63 +294,62 @@ export default function HomeContent({ tasks, setTasks, seconds, timerRunning, se
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
-        className="bg-white/90 backdrop-blur-xl border border-gray-200/60 rounded-3xl p-6 md:p-8 shadow-lg shadow-purple-100/50 hover:shadow-xl hover:shadow-purple-200/50 transition-all duration-500"
+        className="bg-[#E6F9F5] border-2 border-[#2D2B28] rounded-3xl p-6 md:p-8 shadow-[6px_6px_0px_0px_#2D2B28]"
       >
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-          <div className="flex items-center gap-2.5">
-            <div className="w-2 h-2 rounded-full bg-purple-500 animate-pulse shadow-lg shadow-purple-300" />
-            <h2 className="text-sm font-semibold text-gray-600 tracking-wide">
+          <div className="flex items-center gap-3">
+            <div className="bg-[#2D2B28] p-2 rounded-lg">
+              <Sparkles className="text-[#E6F9F5]" size={20} strokeWidth={2.5} />
+            </div>
+            <h2 className="text-sm font-black text-[#2D2B28] uppercase tracking-widest">
               AI Notes Summary
             </h2>
           </div>
           <motion.button
-            whileHover={{ scale: 1.03, y: -2 }}
-            whileTap={{ scale: 0.97 }}
+            whileHover={{ scale: 1.02, y: -2, boxShadow: "4px 4px 0px 0px #2D2B28" }}
+            whileTap={{ scale: 0.98, y: 0, boxShadow: "0px 0px 0px 0px #2D2B28" }}
             onClick={handleSummarizeClick}
             disabled={loadingSummary}
-            className="flex items-center justify-center gap-2.5 px-5 py-3 text-sm bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl shadow-lg shadow-purple-300/50 hover:shadow-xl hover:shadow-purple-400/60 transition-all text-white font-bold disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
+            className="flex items-center justify-center gap-2 px-6 py-3 text-sm bg-[#6A0572] border-2 border-[#2D2B28] rounded-xl shadow-[2px_2px_0px_0px_#2D2B28] transition-all text-[#FAF5EE] font-black uppercase disabled:opacity-50 w-full sm:w-auto"
           >
-            <Sparkles size={16} strokeWidth={2.5} className={loadingSummary ? "animate-spin" : ""} />
-            {loadingSummary ? "Generating..." : "Generate Summary"}
+            <Sparkles size={18} strokeWidth={2.5} className={loadingSummary ? "animate-spin" : ""} />
+            {loadingSummary ? "Thinking..." : "Generate"}
           </motion.button>
         </div>
 
-        {notesSummary && (
+        {notesSummary ? (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="p-6 bg-gradient-to-br from-purple-50 to-pink-50 border border-purple-100 rounded-3xl text-gray-800 text-sm md:text-base font-medium leading-relaxed shadow-inner"
+            className="p-6 bg-[#FAF5EE] border-2 border-[#2D2B28] rounded-2xl text-[#2D2B28] text-sm md:text-base font-medium leading-relaxed shadow-[4px_4px_0px_0px_rgba(45,43,40,0.1)]"
           >
             {notesSummary}
           </motion.div>
-        )}
-
-        {!notesSummary && !loadingSummary && (
-          <div className="text-center py-16">
-            <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-purple-100 to-pink-100 border border-purple-200 flex items-center justify-center mx-auto mb-5 shadow-sm">
-              <Sparkles size={28} className="text-purple-600" strokeWidth={2} />
+        ) : (
+          !loadingSummary && (
+            <div className="text-center py-10 border-2 border-dashed border-[#2D2B28]/20 rounded-2xl bg-[#FAF5EE]/50">
+              <p className="text-sm text-[#2D2B28]/60 font-bold max-w-md mx-auto">
+                Click Generate to analyze your notes
+              </p>
             </div>
-            <p className="text-sm text-gray-500 font-medium max-w-md mx-auto">
-              Click "Generate Summary" to get an AI-powered overview of all your notes.
-            </p>
-          </div>
+          )
         )}
       </motion.div>
 
       <style jsx>{`
         .custom-scrollbar::-webkit-scrollbar {
-          width: 6px;
+          width: 8px;
         }
         .custom-scrollbar::-webkit-scrollbar-track {
-          background: rgba(243, 244, 246, 0.5);
-          border-radius: 10px;
+          background: transparent;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: rgba(156, 163, 175, 0.5);
-          border-radius: 10px;
+          background: #2D2B28;
+          border-radius: 4px;
+          border: 2px solid #FFF9E6;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: rgba(107, 114, 128, 0.7);
+          background: #555;
         }
       `}</style>
     </div>

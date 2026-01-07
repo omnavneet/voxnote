@@ -1,6 +1,7 @@
+"use client";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Check, Calendar } from "lucide-react";
+import { X, Check, Calendar, Clock } from "lucide-react";
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const START_HOUR = 8;
@@ -14,9 +15,13 @@ export default function Timetable() {
   const [error, setError] = useState("");
 
   async function fetchTimetable() {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/timetable`, { credentials: "include" });
-    const data = await res.json();
-    setSlots(data);
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/timetable`, { credentials: "include" });
+      const data = await res.json();
+      setSlots(data);
+    } catch (e) {
+      console.error("Failed to fetch timetable");
+    }
   }
 
   useEffect(() => {
@@ -80,25 +85,18 @@ export default function Timetable() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto h-[calc(100vh-200px)] md:h-[calc(100vh-180px)] flex flex-col">
-      <div className="flex items-center gap-2.5 mb-5">
-        <div className="w-2 h-2 rounded-full bg-blue-500" />
-        <h2 className="text-xl md:text-2xl font-bold text-gray-800 tracking-tight">
-          Weekly Schedule
-        </h2>
-      </div>
-
-      <div className="flex-1 overflow-auto rounded-3xl border border-gray-200/60 bg-white/90 backdrop-blur-xl shadow-lg">
-        <table className="w-full border-collapse text-sm">
-          <thead className="sticky top-0 bg-gradient-to-br from-blue-50 to-indigo-50 backdrop-blur-xl z-10">
+    <div className="h-[calc(100vh-200px)] md:h-[calc(100vh-180px)] flex flex-col pb-6">
+      <div className="flex-1 overflow-auto rounded-3xl border-2 border-[#2D2B28] bg-[#FFF9E6] shadow-[6px_6px_0px_0px_#2D2B28] custom-scrollbar relative">
+        <table className="w-full border-collapse border-spacing-0">
+          <thead className="sticky top-0 z-20">
             <tr>
-              <th className="border border-gray-200 px-3 md:px-4 py-3 text-left font-semibold text-gray-600 text-xs md:text-sm tracking-wide">
+              <th className="bg-[#2D2B28] text-[#FAF5EE] p-3 border-r-2 border-b-2 border-[#FAF5EE]/20 text-left font-black uppercase tracking-wider sticky left-0 z-30 w-24">
                 Time
               </th>
               {DAYS.map((day) => (
                 <th
                   key={day}
-                  className="border border-gray-200 px-3 md:px-4 py-3 text-center font-semibold text-gray-600 text-xs md:text-sm tracking-wide"
+                  className="bg-[#2D2B28] text-[#FAF5EE] p-3 border-b-2 border-l-2 border-[#FAF5EE]/20 text-center font-black uppercase tracking-wider min-w-[120px]"
                 >
                   {day}
                 </th>
@@ -108,8 +106,8 @@ export default function Timetable() {
 
           <tbody>
             {Array.from({ length: END_HOUR - START_HOUR }, (_, i) => START_HOUR + i).map((hour) => (
-              <tr key={hour} className="hover:bg-gray-50 transition-colors">
-                <td className="border border-gray-200 px-3 md:px-4 py-3 md:py-4 text-xs md:text-sm text-gray-600 font-semibold bg-gray-50/50">
+              <tr key={hour} className="group">
+                <td className="sticky left-0 z-10 bg-[#FAF5EE] border-r-2 border-b-2 border-[#2D2B28]/20 px-3 py-4 text-xs font-black text-[#2D2B28] uppercase tracking-widest text-center">
                   {hour}:00
                 </td>
 
@@ -119,14 +117,20 @@ export default function Timetable() {
                     <td
                       key={day}
                       onClick={() => openEditor(day, hour)}
-                      className={`border border-gray-200 px-3 md:px-4 py-3 md:py-4 cursor-pointer transition-all ${slot?.label
-                        ? "bg-gradient-to-br from-orange-50 to-red-50 hover:from-blue-100 hover:to-indigo-100"
-                        : "hover:bg-gray-50"
+                      className={`border-b-2 border-r-2 border-[#2D2B28]/10 px-2 py-1 cursor-pointer transition-all relative h-16 align-top hover:bg-[#2D2B28]/5 ${slot?.label ? "bg-[#E6F9F5]" : ""
                         }`}
                     >
-                      <span className="text-xs md:text-sm text-gray-800 font-medium">
-                        {slot?.label || ""}
-                      </span>
+                      {slot?.label && (
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          className="w-full h-full bg-[#4ECDC4] border-2 border-[#2D2B28] rounded-lg p-2 shadow-[2px_2px_0px_0px_#2D2B28] hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_0px_#2D2B28] transition-all"
+                        >
+                          <span className="text-xs text-[#2D2B28] font-bold line-clamp-2 leading-tight">
+                            {slot.label}
+                          </span>
+                        </motion.div>
+                      )}
                     </td>
                   );
                 })}
@@ -142,31 +146,31 @@ export default function Timetable() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-[#2D2B28]/80 backdrop-blur-sm p-4"
             onClick={() => !saving && setActiveSlot(null)}
           >
             <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
+              initial={{ scale: 0.95, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 20 }}
               onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-md rounded-3xl bg-white/95 backdrop-blur-xl border border-gray-200 p-6 md:p-8 shadow-2xl"
+              className="w-full max-w-md rounded-3xl bg-[#FFF9E6] border-2 border-[#2D2B28] p-6 md:p-8 shadow-[8px_8px_0px_0px_#2D2B28]"
             >
               <div className="flex items-start justify-between mb-6">
                 <div>
-                  <h3 className="text-gray-800 font-bold text-lg md:text-xl mb-2">
-                    Edit Time Slot
+                  <h3 className="text-[#2D2B28] font-black text-xl md:text-2xl uppercase tracking-wide mb-2">
+                    Edit Slot
                   </h3>
-                  <div className="flex items-center gap-2 text-sm text-gray-600 font-medium">
-                    <Calendar size={16} strokeWidth={2} />
+                  <div className="flex items-center gap-2 text-sm text-[#2D2B28]/70 font-bold bg-[#FAF5EE] px-3 py-1 rounded-lg border-2 border-[#2D2B28]/20 inline-flex">
+                    <Calendar size={16} strokeWidth={2.5} />
                     <span>{activeSlot.day} • {activeSlot.hour}:00 - {activeSlot.hour + 1}:00</span>
                   </div>
                 </div>
                 <button
                   onClick={() => !saving && setActiveSlot(null)}
-                  className="p-2 rounded-xl hover:bg-gray-100 transition-colors"
+                  className="p-2 rounded-xl border-2 border-transparent hover:border-[#2D2B28] hover:bg-[#FAF5EE] transition-all"
                 >
-                  <X size={20} className="text-gray-500" strokeWidth={2} />
+                  <X size={20} className="text-[#2D2B28]" strokeWidth={2.5} />
                 </button>
               </div>
 
@@ -174,40 +178,45 @@ export default function Timetable() {
                 <motion.div
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="mb-4 p-4 rounded-2xl bg-red-50 border border-red-100 text-red-600 text-sm font-medium"
+                  className="mb-4 p-4 rounded-xl bg-[#E8503A] border-2 border-[#2D2B28] text-white font-bold shadow-[2px_2px_0px_0px_#2D2B28]"
                 >
                   {error}
                 </motion.div>
               )}
 
-              <input
-                autoFocus
-                value={draftLabel}
-                onChange={(e) => setDraftLabel(e.target.value)}
-                onKeyPress={(e) => e.key === "Enter" && !saving && saveSlot()}
-                placeholder="What are you doing?"
-                className="w-full rounded-2xl bg-gray-50 border border-gray-200 px-4 py-3.5 text-gray-800 font-medium text-sm placeholder:text-gray-400 outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-              />
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-xs font-black uppercase tracking-widest text-[#2D2B28] mb-2">Activity</label>
+                  <input
+                    autoFocus
+                    value={draftLabel}
+                    onChange={(e) => setDraftLabel(e.target.value)}
+                    onKeyPress={(e) => e.key === "Enter" && !saving && saveSlot()}
+                    placeholder="What needs to be done?"
+                    className="w-full rounded-xl bg-[#FAF5EE] border-2 border-[#2D2B28] px-4 py-3 text-[#2D2B28] font-bold text-base placeholder:text-[#2D2B28]/30 outline-none focus:shadow-[4px_4px_0px_0px_#2D2B28] transition-all"
+                  />
+                </div>
+              </div>
 
-              <div className="flex justify-end gap-3 mt-6">
+              <div className="flex justify-end gap-3 mt-8">
                 <motion.button
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.97 }}
+                  whileHover={{ scale: 1.02, y: -2, boxShadow: "2px 2px 0px 0px #2D2B28" }}
+                  whileTap={{ scale: 0.98, y: 0, boxShadow: "0px 0px 0px 0px #2D2B28" }}
                   onClick={() => !saving && setActiveSlot(null)}
-                  className="px-5 py-3 text-sm text-gray-600 hover:bg-gray-100 rounded-2xl font-semibold transition-colors"
+                  className="px-6 py-3 text-sm text-[#2D2B28] bg-[#FAF5EE] border-2 border-[#2D2B28] rounded-xl font-black uppercase tracking-wide transition-all"
                 >
                   Cancel
                 </motion.button>
 
                 <motion.button
-                  whileHover={{ scale: 1.03, y: -2 }}
-                  whileTap={{ scale: 0.97 }}
+                  whileHover={{ scale: 1.02, y: -2, boxShadow: "4px 4px 0px 0px #2D2B28" }}
+                  whileTap={{ scale: 0.98, y: 0, boxShadow: "0px 0px 0px 0px #2D2B28" }}
                   onClick={saveSlot}
                   disabled={saving}
-                  className="flex items-center gap-2.5 px-6 py-3 rounded-2xl bg-gradient-to-r from-indigo-600 to-blue-600 text-white text-sm font-bold shadow-lg shadow-indigo-300/50 hover:shadow-xl hover:shadow-indigo-400/60 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center gap-2 px-6 py-3 rounded-xl bg-[#FFC94D] border-2 border-[#2D2B28] text-[#2D2B28] text-sm font-black uppercase tracking-wide shadow-[2px_2px_0px_0px_#2D2B28] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <Check size={16} strokeWidth={2.5} />
-                  {saving ? "Saving..." : "Save"}
+                  <Check size={18} strokeWidth={3} />
+                  {saving ? "..." : "Save"}
                 </motion.button>
               </div>
             </motion.div>
@@ -216,20 +225,25 @@ export default function Timetable() {
       </AnimatePresence>
 
       <style jsx>{`
-        .overflow-auto::-webkit-scrollbar {
-          width: 8px;
-          height: 8px;
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 10px;
+          height: 10px;
         }
-        .overflow-auto::-webkit-scrollbar-track {
-          background: rgba(243, 244, 246, 0.5);
-          border-radius: 10px;
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: #2D2B28;
+          border-bottom-right-radius: 1.5rem; 
+          border-bottom-left-radius: 1.5rem;
         }
-        .overflow-auto::-webkit-scrollbar-thumb {
-          background: rgba(156, 163, 175, 0.5);
-          border-radius: 10px;
+        .custom-scrollbar::-webkit-scrollbar-corner {
+             background: #2D2B28;
         }
-        .overflow-auto::-webkit-scrollbar-thumb:hover {
-          background: rgba(107, 114, 128, 0.7);
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: #FAF5EE;
+          border: 2px solid #2D2B28;
+          border-radius: 5px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: #E8503A;
         }
       `}</style>
     </div>

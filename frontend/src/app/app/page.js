@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Home, Calendar, FileText, Bot, User, LogOut, Image } from "lucide-react";
+import { Home, Calendar, FileText, Bot, User, LogOut, Image as ImageIcon } from "lucide-react";
 import HomeContent from "./components/HomeContent";
 import Timetable from "./components/Timetable";
 import Notes from "./components/notes";
@@ -17,19 +17,25 @@ export default function DashboardPage() {
   const [logoutLoading, setLogoutLoading] = useState(false);
 
   async function fetchTasks() {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tasks`, {
-      method: "GET",
-      credentials: "include",
-    });
-    setTasks(await res.json());
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tasks`, {
+        method: "GET",
+        credentials: "include",
+      });
+      if (res.ok) setTasks(await res.json());
+    } catch (e) { }
   }
 
   async function fetchTodayFocused() {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/timer/today`, {
-      credentials: "include",
-    });
-    const data = await res.json();
-    setTodayFocusedSec(data.totalSec || 0);
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/timer/today`, {
+        credentials: "include",
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setTodayFocusedSec(data.totalSec || 0);
+      }
+    } catch (e) { }
   }
 
   async function handleLogout() {
@@ -62,6 +68,15 @@ export default function DashboardPage() {
     (todayFocusedSec + (timerRunning ? seconds : 0)) / 60
   );
 
+  const navItems = [
+    { id: "home", icon: Home, label: "Home", color: "bg-[#E8503A]" },
+    { id: "notes", icon: FileText, label: "Notes", color: "bg-[#FFC94D]" },
+    { id: "image", icon: ImageIcon, label: "Journal", color: "bg-[#4ECDC4]" },
+    { id: "timetable", icon: Calendar, label: "Schedule", color: "bg-[#FF9F1C]" },
+    { id: "interview", icon: Bot, label: "Coach", color: "bg-[#6A0572]" },
+    { id: "profile", icon: User, label: "Account", color: "bg-[#2D2B28]" },
+  ];
+
   const renderContent = () => {
     switch (activeNav) {
       case "home":
@@ -81,12 +96,13 @@ export default function DashboardPage() {
         return <Notes />;
       case "interview":
         return (
-          <div className="flex items-center justify-center min-h-[60vh]">
-            <div className="text-center">
-              <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-blue-100 to-indigo-100 border border-blue-200 flex items-center justify-center mx-auto mb-4 shadow-sm">
-                <Bot size={28} className="text-blue-600" strokeWidth={2} />
+          <div className="flex items-center justify-center min-h-[50vh]">
+            <div className="text-center p-8 bg-[#FFF9E6] border-2 border-[#2D2B28] rounded-3xl shadow-[4px_4px_0px_0px_#2D2B28]">
+              <div className="w-20 h-20 rounded-2xl bg-[#E6F9F5] border-2 border-[#2D2B28] flex items-center justify-center mx-auto mb-6 shadow-[2px_2px_0px_0px_#2D2B28]">
+                <Bot size={32} className="text-[#2D2B28]" strokeWidth={2.5} />
               </div>
-              <p className="text-sm text-gray-600 font-medium">Interview Coach Coming Soon</p>
+              <h3 className="text-xl font-bold text-[#2D2B28] mb-2">Interview Coach</h3>
+              <p className="text-[#2D2B28]/70 font-medium">Coming Soon</p>
             </div>
           </div>
         );
@@ -109,42 +125,49 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-rose-50 via-orange-50 to-amber-50 overflow-hidden">
-      <div className="h-screen flex flex-col">
+    <div className="min-h-screen bg-[#FAF5EE] text-[#2D2B28] font-sans overflow-hidden selection:bg-[#FFC94D] selection:text-[#2D2B28]">
+      <div className="h-screen flex flex-col relative">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-[#FFC94D]/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-[#4ECDC4]/10 rounded-full blur-3xl pointer-events-none" />
+
         <motion.div
-          initial={{ opacity: 0, y: -10 }}
+          initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="pt-6 md:pt-8 pb-4 md:pb-6 px-4 md:px-6 flex justify-between items-start max-w-7xl mx-auto w-full flex-shrink-0"
+          className="pt-8 pb-6 px-6 md:px-12 flex flex-row justify-between items-end max-w-6xl mx-auto w-full flex-shrink-0 z-10"
         >
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-800 tracking-tight">
-              Good evening
+            <div className="inline-block px-4 py-2 bg-[#2D2B28] text-[#FAF5EE] text-sm md:text-base font-bold rounded-xl mb-2 tracking-widest shadow-[2px_2px_0px_0px_rgba(0,0,0,0.2)]">
+              DASHBOARD
+            </div>
+            <h1 className="text-3xl md:text-5xl font-black text-[#2D2B28] tracking-tighter uppercase leading-none">
+              {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
             </h1>
           </div>
-          <div className="text-right space-y-1">
-            <div className="flex items-center gap-2 justify-end">
-              <div className="w-2 h-2 rounded-full bg-emerald-500" />
-              <p className="text-sm text-gray-600 font-semibold">
-                {tasks.length} tasks
+
+          <div className="flex flex-col md:flex-row gap-3 items-end md:items-center">
+            <div className="flex items-center gap-2 bg-[#FFF9E6] px-4 py-2 rounded-xl border-2 border-[#2D2B28] shadow-[3px_3px_0px_0px_#2D2B28]">
+              <div className="w-3 h-3 rounded-full bg-[#E8503A] border border-[#2D2B28]" />
+              <p className="text-xs md:text-sm font-bold text-[#2D2B28]">
+                {tasks.length} TASKS
               </p>
             </div>
-            <div className="flex items-center gap-2 justify-end">
-              <div className="w-2 h-2 rounded-full bg-indigo-500" />
-              <p className="text-sm text-gray-600 font-semibold">
-                {totalFocusedMinutes}m focused
+            <div className="flex items-center gap-2 bg-[#E6F9F5] px-4 py-2 rounded-xl border-2 border-[#2D2B28] shadow-[3px_3px_0px_0px_#2D2B28]">
+              <div className="w-3 h-3 rounded-full bg-[#4ECDC4] border border-[#2D2B28]" />
+              <p className="text-xs md:text-sm font-bold text-[#2D2B28]">
+                {totalFocusedMinutes}m FOCUS
               </p>
             </div>
           </div>
         </motion.div>
 
-        <div className="flex-1 overflow-y-auto px-4 md:px-6 pb-28 md:pb-32 scrollbar-hide">
-          <div className="max-w-7xl mx-auto">
+        <div className="flex-1 overflow-y-auto px-4 md:px-8 pb-36 scrollbar-hide z-0">
+          <div className="max-w-6xl mx-auto w-full">
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeNav}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
+                initial={{ opacity: 0, scale: 0.99 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.99 }}
                 transition={{ duration: 0.2 }}
               >
                 {renderContent()}
@@ -154,56 +177,41 @@ export default function DashboardPage() {
         </div>
 
         <motion.nav
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3, type: "spring", stiffness: 260, damping: 20 }}
-          className="fixed bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 px-3 md:px-4 py-3 md:py-3.5 rounded-[28px] bg-white/90 backdrop-blur-xl shadow-xl shadow-gray-300/30 border border-gray-200/50 z-50"
+          transition={{ type: "spring", stiffness: 300, damping: 25 }}
+          className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-2xl"
         >
-          <div className="flex items-center gap-1 md:gap-2">
-            {[
-              { id: "home", icon: Home, label: "Dashboard" },
-              { id: "notes", icon: FileText, label: "Notes" },
-              { id: "image", icon: Image, label: "Journal" },
-              { id: "timetable", icon: Calendar, label: "Schedule" },
-              { id: "interview", icon: Bot, label: "Coach" },
-              { id: "profile", icon: User, label: "Account" },
-            ].map(({ id, icon: Icon, label }) => (
-              <motion.button
-                key={id}
-                onClick={() => setActiveNav(id)}
-                className={`relative p-3 md:p-3.5 rounded-[20px] transition-all ${activeNav === id
-                  ? "text-white"
-                  : "text-gray-500 hover:text-gray-700"
-                  }`}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                title={label}
-              >
-                {activeNav === id && (
-                  <motion.div
-                    layoutId="activeTab"
-                    className="absolute inset-0 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-[20px] shadow-lg shadow-indigo-300/50"
-                    transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                  />
-                )}
-                <Icon size={20} className="relative z-10" strokeWidth={2} />
-              </motion.button>
-            ))}
+          <div className="bg-[#FAF5EE] border-2 border-[#2D2B28] rounded-[2rem] p-3 flex justify-between items-center shadow-[6px_6px_0px_0px_#2D2B28]">
+            {navItems.map(({ id, icon: Icon, color }) => {
+              const isActive = activeNav === id;
+              return (
+                <motion.button
+                  key={id}
+                  onClick={() => setActiveNav(id)}
+                  className={`relative w-12 h-12 md:w-14 md:h-14 flex items-center justify-center rounded-2xl transition-all border-2 ${isActive
+                    ? `${color} border-[#2D2B28] text-[#FAF5EE] -translate-y-2 shadow-[4px_4px_0px_0px_#2D2B28]`
+                    : "bg-transparent border-transparent text-[#2D2B28]/40 hover:bg-[#2D2B28]/5 hover:text-[#2D2B28]"
+                    }`}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Icon size={22} strokeWidth={2.5} />
+                </motion.button>
+              );
+            })}
           </div>
         </motion.nav>
 
         <motion.button
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.4, type: "spring", stiffness: 260 }}
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
           onClick={handleLogout}
           disabled={logoutLoading}
-          className="hidden md:flex fixed bottom-8 right-8 p-4 rounded-[22px] bg-white/90 backdrop-blur-xl shadow-lg shadow-red-200/30 border border-red-100 text-red-500 hover:bg-red-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed items-center justify-center z-50"
-          whileHover={{ scale: 1.05, y: -2 }}
-          whileTap={{ scale: 0.95 }}
-          title={logoutLoading ? "Logging out..." : "Logout"}
+          className="hidden md:flex fixed top-8 right-8 w-12 h-12 rounded-xl bg-[#E8503A] border-2 border-[#2D2B28] text-[#FAF5EE] items-center justify-center shadow-[3px_3px_0px_0px_#2D2B28] hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-[1px_1px_0px_0px_#2D2B28] active:shadow-none active:translate-y-[3px] active:translate-x-[3px] transition-all disabled:opacity-50 disabled:cursor-not-allowed z-50"
+          title="Logout"
         >
-          <LogOut size={20} strokeWidth={2} />
+          <LogOut size={20} strokeWidth={2.5} />
         </motion.button>
       </div>
 

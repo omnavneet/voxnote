@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Upload, Trash2, X, FileImage } from "lucide-react";
+import { Upload, Trash2, X, FileImage, Image as ImageIcon } from "lucide-react";
 
 export default function ImagesPage() {
   const [images, setImages] = useState([]);
@@ -78,7 +78,7 @@ export default function ImagesPage() {
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-4 p-4 rounded-2xl bg-red-50 border border-red-100 text-red-600 text-sm font-medium shadow-sm"
+          className="mb-6 p-4 rounded-xl bg-[#E8503A] border-2 border-[#2D2B28] text-white font-bold shadow-[4px_4px_0px_0px_#2D2B28]"
         >
           {error}
         </motion.div>
@@ -90,90 +90,95 @@ export default function ImagesPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex items-center justify-center p-6"
+            className="fixed inset-0 z-[100] bg-[#2D2B28]/95 backdrop-blur-sm flex items-center justify-center p-6"
             onClick={() => setFullscreenImage(null)}
           >
             <button
               onClick={() => setFullscreenImage(null)}
-              className="absolute top-6 right-6 p-3.5 rounded-2xl bg-white/10 hover:bg-white/20 transition-all"
+              className="absolute top-6 right-6 p-3 rounded-xl bg-[#E8503A] border-2 border-[#FAF5EE] hover:bg-[#FFC94D] hover:text-[#2D2B28] transition-all text-[#FAF5EE] shadow-[2px_2px_0px_0px_#FAF5EE]"
             >
-              <X size={20} className="text-white" strokeWidth={2} />
+              <X size={24} strokeWidth={2.5} />
             </button>
-            <img
+            <motion.img
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
               src={fullscreenImage}
-              className="max-w-full max-h-full rounded-2xl object-contain"
+              className="max-w-[90vw] max-h-[85vh] rounded-xl border-4 border-[#FAF5EE] object-contain shadow-[8px_8px_0px_0px_#000]"
               alt="fullscreen"
+              onClick={(e) => e.stopPropagation()}
             />
           </motion.div>
         )}
       </AnimatePresence>
 
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-5 md:mb-6">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6 md:mb-8">
         <div>
-          <h1 className="text-xl md:text-2xl font-bold text-gray-800 tracking-tight">Image Gallery</h1>
-          <div className="flex items-center gap-2 mt-1">
-            <div className="w-2 h-2 rounded-full bg-pink-500" />
-            <p className="text-sm text-gray-600 font-semibold">
-              {images.length} {images.length === 1 ? "image" : "images"}
-            </p>
+          <div className="flex items-center gap-3 mt-3">
+            <div className="px-3 py-1 bg-[#2D2B28] rounded-full border border-[#2D2B28]">
+                <span className="text-xs font-bold text-[#4ECDC4] tracking-wider">
+                {images.length} {images.length === 1 ? "SNAP" : "SNAPS"}
+                </span>
+            </div>
           </div>
         </div>
 
         <label className="cursor-pointer">
           <motion.div
-            whileHover={{ scale: 1.03, y: -2 }}
-            whileTap={{ scale: 0.97 }}
-            className="flex items-center justify-center gap-2.5 px-6 py-3.5 text-sm bg-gradient-to-r from-pink-600 to-rose-600 rounded-2xl shadow-lg shadow-pink-300/50 hover:shadow-xl hover:shadow-pink-400/60 transition-all text-white font-bold disabled:opacity-50"
+            whileHover={{ scale: 1.02, y: -2, boxShadow: "4px 4px 0px 0px #2D2B28" }}
+            whileTap={{ scale: 0.98, y: 0, boxShadow: "0px 0px 0px 0px #2D2B28" }}
+            className={`flex items-center justify-center gap-3 px-6 py-4 text-sm border-2 border-[#2D2B28] rounded-xl shadow-[2px_2px_0px_0px_#2D2B28] transition-all font-black uppercase tracking-wide ${
+                loading ? "bg-[#FAF5EE] text-[#2D2B28]/50" : "bg-[#4ECDC4] text-[#2D2B28]"
+            }`}
           >
-            <Upload size={18} strokeWidth={2.5} />
+            <Upload size={20} strokeWidth={3} />
             {loading ? "Uploading..." : "Upload Image"}
           </motion.div>
           <input type="file" accept="image/*" hidden onChange={handleUpload} disabled={loading} />
         </label>
       </div>
 
-      <div className="flex-1 overflow-auto">
+      <div className="flex-1 overflow-auto pr-2 custom-scrollbar">
         {images.length === 0 ? (
-          <div className="h-full flex items-center justify-center">
-            <div className="text-center">
-              <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-pink-100 to-rose-100 border border-pink-200 flex items-center justify-center mx-auto mb-5 shadow-sm">
-                <FileImage size={32} className="text-pink-600" strokeWidth={2} />
+          <div className="h-full flex items-center justify-center border-2 border-dashed border-[#2D2B28]/20 rounded-3xl bg-[#FAF5EE]/50">
+            <div className="text-center opacity-50">
+              <div className="w-24 h-24 rounded-full bg-[#2D2B28] flex items-center justify-center mx-auto mb-6">
+                <ImageIcon size={40} className="text-[#FAF5EE]" strokeWidth={1.5} />
               </div>
-              <p className="text-sm text-gray-500 font-medium">No images uploaded yet</p>
+              <p className="text-lg text-[#2D2B28] font-black uppercase tracking-widest">No images yet</p>
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4 pb-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 pb-6">
             {images.map((img, idx) => (
               <motion.div
                 key={img.imageId}
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: idx * 0.03 }}
-                className="relative group rounded-3xl overflow-hidden bg-white/90 border border-gray-200/60 shadow-lg hover:shadow-xl transition-all duration-300 aspect-square"
+                transition={{ delay: idx * 0.05 }}
+                className="relative group rounded-xl overflow-hidden bg-white border-2 border-[#2D2B28] shadow-[4px_4px_0px_0px_#2D2B28] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_0px_#2D2B28] transition-all duration-200 aspect-square flex flex-col"
               >
-                <div className="w-full h-full p-3">
+                <div className="flex-1 w-full h-full p-2 overflow-hidden bg-[#FAF5EE]">
                   <img
                     src={img.url}
                     alt={img.filename}
-                    className="w-full h-full object-contain cursor-pointer"
+                    className="w-full h-full object-cover rounded-lg border border-[#2D2B28]/10 cursor-pointer hover:scale-105 transition-transform duration-500"
                     onClick={() => setFullscreenImage(img.url)}
                   />
                 </div>
 
-                <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                <div className="absolute top-4 right-4 z-10">
                   {deleteConfirm === img.imageId ? (
-                    <div className="flex items-center gap-2 bg-white/95 backdrop-blur-xl rounded-2xl p-1.5 shadow-lg">
+                    <div className="flex items-center gap-2 bg-[#FAF5EE] border-2 border-[#2D2B28] rounded-xl p-1.5 shadow-[2px_2px_0px_0px_#2D2B28]">
                       <button
                         onClick={() => handleDelete(img.imageId)}
                         disabled={deletingId === img.imageId}
-                        className="px-3 py-1.5 text-xs bg-red-100 border border-red-200 rounded-xl text-red-600 font-bold hover:bg-red-200 transition-all disabled:opacity-50"
+                        className="px-3 py-1.5 text-xs bg-[#E8503A] border border-[#2D2B28] rounded-lg text-white font-bold hover:opacity-80 transition-all disabled:opacity-50"
                       >
-                        {deletingId === img.imageId ? "..." : "Delete"}
+                        {deletingId === img.imageId ? "..." : "Confirm"}
                       </button>
                       <button
                         onClick={() => setDeleteConfirm(null)}
-                        className="px-3 py-1.5 text-xs bg-gray-100 border border-gray-200 rounded-xl text-gray-600 font-bold hover:bg-gray-200 transition-all"
+                        className="px-3 py-1.5 text-xs bg-white border border-[#2D2B28] rounded-lg text-[#2D2B28] font-bold hover:bg-gray-100 transition-all"
                       >
                         Cancel
                       </button>
@@ -183,17 +188,17 @@ export default function ImagesPage() {
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.9 }}
                       onClick={() => setDeleteConfirm(img.imageId)}
-                      className="p-2.5 rounded-2xl bg-white/95 backdrop-blur-xl hover:bg-red-50 border border-gray-200 hover:border-red-200 transition-all shadow-lg"
+                      className="p-2 rounded-xl bg-[#FAF5EE] border-2 border-[#2D2B28] shadow-[2px_2px_0px_0px_#2D2B28] hover:bg-[#E8503A] hover:text-white transition-all opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0"
                     >
-                      <Trash2 size={16} className="text-gray-600 hover:text-red-600" strokeWidth={2} />
+                      <Trash2 size={18} strokeWidth={2.5} />
                     </motion.button>
                   )}
                 </div>
 
-                <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-b-3xl">
-                  <p className="text-xs text-white font-semibold truncate">
-                    {new Date(img.createdAt).toLocaleDateString()}
-                  </p>
+                <div className="bg-[#2D2B28] py-2 px-3 flex justify-center border-t-2 border-[#2D2B28]">
+                    <p className="text-[10px] md:text-xs text-[#FAF5EE] font-mono font-bold tracking-widest truncate">
+                        {new Date(img.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).toUpperCase()}
+                    </p>
                 </div>
               </motion.div>
             ))}
@@ -202,19 +207,19 @@ export default function ImagesPage() {
       </div>
 
       <style jsx>{`
-        .overflow-auto::-webkit-scrollbar {
+        .custom-scrollbar::-webkit-scrollbar {
           width: 8px;
         }
-        .overflow-auto::-webkit-scrollbar-track {
-          background: rgba(243, 244, 246, 0.5);
-          border-radius: 10px;
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: transparent;
         }
-        .overflow-auto::-webkit-scrollbar-thumb {
-          background: rgba(156, 163, 175, 0.5);
-          border-radius: 10px;
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: #2D2B28;
+          border-radius: 4px;
+          border: 2px solid #FFF9E6;
         }
-        .overflow-auto::-webkit-scrollbar-thumb:hover {
-          background: rgba(107, 114, 128, 0.7);
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: #555;
         }
       `}</style>
     </div>
